@@ -1,0 +1,71 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" />
+{% endblock %}
+{% block title %}Page de présentation de la communauté{% endblock %}
+{% block metaTitle %}page de présentation de la communauté{% endblock %}
+{% block meta %}Consultez la présentation , les détails de la communauté sur tribADD.  Vous saurez tout ce qu'il faut savoir, les objectifs, les intérêts de chaque communauté{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background">
+                    {% if communaute.photoCouverture is not null %}
+                        <img src="{{ asset('couverture/') }}{{ communaute.photoCouverture }}" alt="">
+                    {% else %}
+                        <img src="{{ asset('assets/image/empty-image-min.jpg') }}" alt="">
+                    {% endif %}
+                </div>
+                <div class="community-title">
+                    <div class="community-profil">
+                        {% if communaute.photoProfil is not null %}
+                            <img src="{{ asset('profil/') }}{{ communaute.photoProfil }}" alt="">
+                        {% else %}
+                            <img src="{{ asset('assets/image/empty-image-min.jpg') }}" alt="">
+                        {% endif %}
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'presentation': ' disabled'} %}
+            <hr class="separator">
+            <div class="community-body">
+                <h3 class="mb-5">Présentation</h3>
+                <div class="community-description">
+                    <div class="description-long">{{ communaute.descLong|raw }}</div>
+                </div>
+                <hr class="separator">
+                <div class="back">
+                    <a class="btn btn-yellow mt-1" href="{{ app.user ? path('ShowmyCommunaute', {urlPublic: communaute.urlPublic}) : path('ShowmyCommunaute1', {urlPublic:communaute.urlPublic}) }}">Revenir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+{% endblock %}

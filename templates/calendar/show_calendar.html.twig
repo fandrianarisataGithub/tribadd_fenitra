@@ -1,0 +1,248 @@
+{% extends 'layout2.html.twig' %}
+{% block title %}{{ communaute.titre }} -  calendrier{% endblock %}
+{% block metaTitle %}{{ communaute.titre }}{% endblock %}
+{% block meta %}{{ communaute.descCourt }}{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"
+          integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
+          crossorigin="anonymous"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.css" 
+        integrity="sha256-uq9PNlMzB+1h01Ij9cx7zeE2OR2pLAfRw3uUUOOPKdA=" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ asset('calendar_css/calendar.css') }}">
+    <style>
+       
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            border: 1px solid #5555;
+            padding-top: 10px;
+            margin: 3px 15px;
+        }
+        .order {
+            line-height: 2;
+        }
+        ul.ks-cboxtags {
+            list-style: none;
+            padding: 10px 0;
+        }
+        ul.ks-cboxtags li{
+            display: inline;
+        }
+        ul.ks-cboxtags li label {
+            padding: 5px 10px;
+            cursor: pointer;
+            display: inline-block;
+            background-color: rgba(255, 255, 255, .9);
+            border: 2px solid rgba(139, 139, 139, .3);
+            color: rgba(0, 0, 0, .6);
+            border-radius: 25px;
+            white-space: nowrap;
+            margin: 3px 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: all .2s;
+        }
+        ul.ks-cboxtags li label::before {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 12px;
+            padding: 2px 6px 2px 2px;
+            content: "\f067";
+            transition: transform .3s ease-in-out;
+
+        }
+        ul.ks-cboxtags li input[type="checkbox"]:checked + label::before {
+            content: "\f00c";
+            transform: rotate(-360deg);
+            transition: transform .3s ease-in-out;
+        }
+
+        ul.ks-cboxtags li input[type="checkbox"]:checked + label {
+            border: 2px solid rgba(13, 105, 180, .8);
+            background-color: rgba(13, 105, 180, .7);
+            color: #fff;
+            transition: all .2s;
+        }
+        ul.ks-cboxtags li input[type="checkbox"] {
+            position: absolute;
+        }
+        ul.ks-cboxtags li input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+        }
+        ul.ks-cboxtags li input[type="checkbox"]:focus + label {
+            border: 2px solid inherit;
+        }
+        a:active,a:focus{
+            border:0 !important;
+        }
+
+    </style>
+    
+{% endblock %}
+
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+           
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc5">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}"
+                             alt="pdp5" class="d-none">
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' %}
+            <hr class="separator">
+            
+            <div class="community-body">
+               <div class="row">
+                   <div class="col-md-12">
+                    {% if app.user and app.user == communaute.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.creation == 1 %}
+                        <a class="btn btn-yellow mb-4 w-fit-content" href="{{ path('newEvent', {'communaute_id' : communaute.id}) }}"><span>Ajouter évènement</span></a>
+                    {% endif %}
+                   </div>
+                   <div id="calendar" class="col-md-12"></div>
+               </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="voir_event" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title_event_modal"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="dates_event">
+                    <p>Date de début : <span id="date_debut"></span></p>
+                    <p>Date de Fin : <span id="date_fin"></span></p>
+                </div>
+                <div id="lieu_event">
+                    <p>Lieu : <span id="lieu"></span></p>
+                </div>
+                <div id="description_event">
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="button_action">
+                    <a href="#" class="btn btn-info" id="voir_detail">Détails complet</a>
+                </div>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.js" 
+    integrity="sha256-rPPF6R+AH/Gilj2aC00ZAuB2EKmnEjXlEWx5MkAp7bw=" crossorigin="anonymous"></script>
+    <script>
+        var data = {{ data|raw }};
+        
+        var communaute_id = '{{ communaute.id }}';
+        //console.log(data);
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView     : '{{ mode_affichage }}',
+                displayEventTime : false, // display time
+                locale: 'fr',
+                headerToolbar   : {
+                    start   : "today prev,next",
+                    center  : "title",
+                    end     : "dayGridMonth,timeGridWeek,dayGridDay,listWeek"
+                },
+                buttonText: {
+                    today: 'Aujourd\'hui',
+                    day: 'Jour',
+                    week:'Semaine',
+                    month:'Mois',
+                    list : 'Liste'
+                }, 
+                //allDaySlot: false,
+                allDayText: 'Toute la journée',
+                editable : false,
+                eventResizableFromStart : true,
+                events : data,
+                //eventContent: { html: '<a href="#"><span class="fa fa-edit"></span></a>' }
+                eventClick: function(info) {
+                    
+                    let title = info.event._def.title;
+                    let participant = info.event._def.extendedProps.participant
+                    let lieu = info.event._def.extendedProps.lieu
+                    let description = info.event._def.extendedProps.description
+                    let id = info.event._def.publicId 
+                    window.location.href = "/calendars/voir_detail_event/" + id;
+                   
+                },
+                
+                
+            });
+
+            calendar.on('eventChange', (e) =>{
+                //console.log(e);
+            })
+
+
+            calendar.render();
+        });
+        $(document).ready(function(){
+            $(document).on('click', '.details_event', function(e){
+                e.preventDefault();
+                
+            })
+        })
+    </script>
+{% endblock  %}
+
+
+

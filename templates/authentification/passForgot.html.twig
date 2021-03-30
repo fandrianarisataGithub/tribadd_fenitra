@@ -1,0 +1,30 @@
+{% extends 'layout.html.twig' %}
+{% block stylesheets %}
+{% endblock %}
+
+{% block body %}
+    <h2 class="mb-1 ml-4"> Mot de passe oublié </h2>
+    <div class="forgot-pass col-sm-12">
+        <div class="sub-forgot-pass"></div>
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <form class="form-forgot-pass"  method="post">
+                <div class="form-group">
+                    <input required class="form-control" type="email" name="email" placeholder="Tapez ici votre email">
+                </div>
+                <div class="error">
+                    {% if error != null %}
+                        <p><i style="color: red; font-weight: bold">{{ error }}</i></p>
+                    {% endif %}
+                </div>
+                <div class="form-group register-submit">
+                    <input class="btn btn-sm btn-yellow mt-1" type="submit" value="Envoyer">
+                    <a href="{{ path('login') }}" class="btn btn-sm btn-outline-secondary mt-1">Annuler</a>
+                </div>
+            </form>
+    </div>
+
+{% endblock %}

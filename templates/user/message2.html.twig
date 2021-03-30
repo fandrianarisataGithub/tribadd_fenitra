@@ -1,0 +1,161 @@
+{% extends 'layout.html.twig' %}
+{% block stylesheets %}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" crossorigin="anonymous" />
+{% endblock %}
+{% set currentPath =  path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+{% block loginSm %}
+    {% if app.user == null %}
+    <div class="login-sm mb-5">
+        <form class="login-form" method="post" action="">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <div class="form-header">
+                <img src="{{ asset('assets/image/tete-removebg-preview.png') }}" alt="photo2">
+            </div>
+            <div class="form-body">
+                <h5 class="form-body-title">se connecter</h5>
+                {% if error is defined %}
+                    <h5 class="text-danger text-center">
+                        l'authentification n'est pas validé
+                    </h5>
+                {% endif %}
+                <input class="form-control" type="hidden" name="path" value="{{ currentPath }}">
+                <input type="text" class="form-control mb-3" name="_username" placeholder="nom d'utilisateur" {% if lastUsername is defined %}value="{{ lastUsername }}"{% endif %} required>
+                <input type="password" class="form-control" name="_password" placeholder="mot de passe" required>
+                {#<div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="remember_me">
+                                <label class="form-check-label" for="remember_me">Ne pas se souvenir de moi</label>
+                            </div>#}
+                <div class="g-recaptcha" data-sitekey='6LdnoP8ZAAAAAO-nSKyWryqEU7RV0xClG3JWaLc8'></div>
+                <input type="submit" name="login" style="display: none">
+                <button class="btn btn-yellow mx-auto" onclick="event.preventDefault(); document.querySelector('.login-sm input[type=\'submit\']').click()">connexion</button>
+                <a href="{{ path('passForgot') }}" class="form-mdp-forgot">mot de passe oublié?</a>
+                <a href="{{ path('registerUser') }}" class="form-sing-up">s'inscrire</a>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+{% endblock %}
+{% block body %}
+    <div class="create-community">
+        <a class="btn btn-blue" href="{{ path('newCommunity') }}" {% if app.user is null %}onclick="message(event)"{% endif %}>créer votre propre réseau communautaire en quelques clics</a>
+    </div>
+    <div class="main">
+        {% block article %}
+        <div class="community-list-container">
+            <h2 class="community-list-title font-weight-bold">
+                Nouveau message
+            </h2>
+            {% for message in app.session.flashbag.get('success') %}
+                <div class="alert mx-3 alert-success alert-dismissible fade show" style="font-weight: bold; font-size: 20px">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+            <div class="col-md-12">
+                {{ form_start(form) }}
+                <div class="row">
+                    {% if app.user == null %}
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <input required type="text" name="username" class="form-control" placeholder="Votre nom">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <input required type="email" name="email" class="form-control" placeholder="Votre adresse email">
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <input required type="text" name="objet" class="form-control" placeholder="Objet">
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <textarea name="contenu" id="sum" placeholder="Votre message..." class="form-control">
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group ml-auto">
+                        <input type="submit" value="Envoyer" class="btn btn-sm btn-yellow">
+                        <a href="javascript:history.back();" class="btn btn-sm btn-outline-secondary">Annuler</a>
+                    </div>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+        {% endblock %}
+        {% block login %}
+            {% if app.user == null %}
+                <div class="login">
+                    <form class="login-form" method="post" action="">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                            <div class="form-header">
+                                <img src="{{ asset('assets/image/tete-removebg-preview.png') }}" alt="photo2">
+                            </div>
+                            <div class="form-body">
+                                <h5 class="form-body-title">se connecter</h5>
+                                {% if error is defined %}
+                                    <h5 class="text-danger text-center">
+                                        l'authentification n'est pas validé
+                                    </h5>
+                                {% endif %}
+                                <input class="form-control" type="hidden" name="path" value="{{ currentPath }}">
+                                <input type="text" class="form-control mb-3" name="_username" placeholder="nom d'utilisateur" {% if lastUsername is defined %}value="{{ lastUsername }}"{% endif %} required>
+                                <input type="password" class="form-control" name="_password" placeholder="mot de passe" required>
+                                {#<div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="remember_me">
+                                    <label class="form-check-label" for="remember_me">Ne pas se souvenir de moi</label>
+                                </div>#}
+                                <div class="g-recaptcha" data-sitekey='6LdnoP8ZAAAAAO-nSKyWryqEU7RV0xClG3JWaLc8'></div>
+                                <input type="submit" name="login" style="display: none">
+                                <button class="btn btn-yellow mx-auto" onclick="event.preventDefault(); document.querySelector('.login input[type=\'submit\']').click()">connexion</button>
+                                <a href="{{ path('passForgot') }}" class="form-mdp-forgot">mot de passe oublié?</a>
+                                <a href="{{ path('registerUser') }}" class="form-sing-up">s'inscrire</a>
+                            </div>
+                        </form>
+                </div>
+            {% endif %}
+        {% endblock %}
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+    <script>
+        $('#sum').summernote({
+            tabsize: 2,
+            minHeight: 200,
+            focus: true
+        });
+        function message(e) {
+            e.preventDefault()
+            toastr["info"]("Veuillez vous connecter avant de créer une communauté.")
+
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+        }
+    </script>
+{% endblock %}
+

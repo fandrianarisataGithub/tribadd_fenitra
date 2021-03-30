@@ -1,0 +1,362 @@
+{% extends 'layout2.html.twig' %}
+{% block title %}{{ communaute.titre }}-{{ event.title }}{% endblock %}
+{% block meta %}{{ communaute.descCourt }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" />
+    <style>
+        figure img{width:300px;}
+        /* The colour of the indicators */
+
+        .blog .carousel-indicators li {
+            background: #708198;
+            border-radius: 50%;
+            width: 8px;
+            height: 8px;
+        }
+
+        .item-box-blog-image figure img {
+            width: 100%;
+            height: auto;
+        }
+
+        .item-box-blog-date span {
+            color: #fff;
+            display: block;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .item-heading-blog a h5 {
+            margin: 0;
+            line-height: 1;
+            text-decoration:none;
+            transition: color 0.3s;
+        }
+
+        .item-box-blog-heading a {
+            text-decoration: none;
+        }
+
+        .item-box-blog-data p {
+            font-size: 13px;
+        }
+
+        .item-box-blog-data p i {
+            font-size: 12px;
+        }
+    </style>
+     <link rel="stylesheet" href="{{ asset('calendar_css/calendar.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="couverture de communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="profil de communaute" class="d-none">
+                    </div>
+                     {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' %}
+            <hr class="separator">
+            <div class="community-body">
+                {% if app.user and communaute.user == app.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.modification == 1 %}
+                    {% if event.user == app.user or app.user == communaute.user or membre.role.libelle == 'administrateur' %}
+                        <a class="btn btn-warning" href="{{ path('editEvent', {'id' : event.id, 'communaute_id' : communaute.id }) }}"><i class="fa fa-pen"></i> Modifier</a>
+                    {% endif %}
+                {% endif %}
+                {% if app.user and communaute.user == app.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.suppression == 1 %}
+                    <a class="btn btn-danger" href="#" id="delete_event"><i class="fa fa-trash-alt"></i> supprimer</a>
+                {% endif %}
+                {% if app.user and communaute.user == app.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.modification == 1 %}
+                    {% if event.user == app.user or app.user == communaute.user or membre.role.libelle == 'administrateur' %}
+                        <a href="{{ path('send_invitation_event',{'event_id' : event.id }) }}" class="btn btn-warning" id="invitation_event">Inviter tous les membres</a>
+                    {% endif %}
+                {% endif %}
+                
+                <a href="#" class="btn btn-warning" id="participer" {% if app.user %}
+                    data-user = "{{ app.user.email }}"
+                    {% else %}
+                    data-user = ""
+                {% endif %}>
+                    Participer <small class="fa fa-spinner"></small><span class="fas fa-check" style="display: none;"></span></a>
+                
+                <div class="row">
+                    <div class="col-lg-12 d-flex flex-column">
+                        <h3 class="mt-4">{{ event.title }}</h3>
+                        <p>Posté le : {{ event.createdAt|date('d-m-y h:i') }}</p>
+                        <p>Par : {{ event.createur }}</p>  
+
+                        <p>Nombre de participant : <span id="nbr_participant"></span></p>
+                        <div class="img-desc col-md-12 mb-2">
+                            <div class="image-encadre mr-2 col-md-12 justify-content-center align-items-center">
+                                <img class="img-responsive" src="{{ event.image is not null ? asset('events/' ~ event.image) : asset('assets/image/empty-image-min.jpg') }}" alt="image event">
+                            </div>
+                            <p class="col-md-8">Lieu de l'évènement : {{ event.lieu }}</p>
+                        </div>
+                        <hr class="separator">
+                        <div class="post-contenu">{{ event.description|raw }}</div>
+                        <hr class="separator">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="register_person_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title_event_modal">Se participer à cet évènement {{ event.title }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h3 class="text-center h3">Veuiller renseigner les formulaires ci-dessous</h3>
+                <form action="" id="create_part">
+                    <div class="form-group">
+                        <label for="nom">Votre nom *</label>
+                        <input type="text" class="form-control" id="nom"> 
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom">Votre prénom </label>
+                        <input type="text" class="form-control" id="prenom"> 
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Votre email *</label>
+                        <input type="text" class="form-control" id="email"> 
+                    </div>
+                    <div class="form-group info bg-danger" style="display:none">
+                         <p style="color: #fff !important;font-size : 12px; padding:10px;"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="button_action">
+                    <a href="#" class="btn btn-info" id="register_person">Enregistrer</a>
+                </div>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="delete_event_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title_event_modal">Voulez-vous vraiment supprimer cet évènement?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <div class="button_action">
+                        <a href="#" class="btn btn-info" id="btn_delete_event">Supprimer</a>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/fr.min.js" integrity="sha512-RAt2+PIRwJiyjWpzvvhKAG2LEdPpQhTgWfbEkFDCo8wC4rFYh5GQzJBVIFDswwaEDEYX16GEE/4fpeDNr7OIZw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function(){
+            load_nombre_participant()
+            
+            test_mail_for_part($('#participer').attr('data-user'));
+            
+            function delete_event(){
+                var id = '{{ event.id }}'
+                window.location.href = 
+            }
+
+            function test_mail_for_part(mail){
+                if(mail != ""){
+                    $.ajax({
+                        url     : "/calendars/event/test_actuel_mail",
+                        type    : "POST",
+                        data    : {
+                            'event_id' : '{{ event.id }}',
+                            'mail'      : mail
+                        },
+                        beforeSend : function(){
+                            $('.fa-spinner').show();
+                        },
+                        success : function(response){
+                            if(response == "yes"){
+                                $('#participer').find('span').show();
+                            }
+                            else{
+                                $('#participer').find('span').hide();
+                            }
+                        },
+                        complete : function(){
+                            $('.fa-spinner').fadeOut();
+                        },
+                        error : function(){
+                            console.log("error tester mail si participant");
+                        }
+                    })
+                }
+            }
+            function load_nombre_participant(){
+                $.ajax({
+                    url     : "/calendars/event/load_nbr_participant",
+                    type    : "POST",
+                    data    : {
+                        'event_id' : '{{ event.id }}',
+                    },
+                    success : function(response){
+                        
+                        $('#nbr_participant').text(response);
+                    },
+                    error : function(){
+                        console.log("error compte participant");
+                    }
+                })
+            }
+            $('#participer').click(function(ev){
+                ev.preventDefault();
+               
+                var user = $(this).attr('data-user');
+                if(user == ""){
+                    $('#register_person_modal').modal('show');
+                }
+                else if(user != ""){
+                   {% if app.user %}
+                   data = {
+                    'nom'       : '{{ app.user.nom }}',
+                    'prenom'    : '{{ app.user.prenom }}',
+                    'email'     : '{{ app.user.email }}', 
+                    'event_id'  : '{{ event.id }}' 
+                }
+                   {% endif %}
+                    $.ajax({
+                        url     : "/calendars/event/participate",
+                        type    : "POST",
+                        data    :data, 
+                        success : function(response){
+                            alert(response);
+                            if(response == "error mail"){
+                                $('.info p').text('Veuillez renseigner un email valide');
+                                $('.info').fadeIn();
+                            }else if(response == "error:exist"){
+                                $('.info p').text('Vous êtes déjà un participant');
+                                $('.info').removeClass("bg-danger");
+                                $('.info').addClass("bg-success");
+                                $('.info').fadeIn();
+                                $('#participer').find('span').show();
+                                setTimeout(function(){
+                                    $('.info').removeClass("bg-success");
+                                    $('.info').addClass("bg-danger");
+                                    $('.info').fadeOut();
+                                    $('#register_person_modal').modal('hide');
+                                },3000)
+                            }else if(response == "ok"){
+                                load_nombre_participant();
+                                $('#participer').find('span').show();
+                            }
+                        }, 
+                        error : function(){
+                            console.log("error add participant");
+                        }
+                    })
+                }
+                $("#register_person").click(function(ev){
+                    ev.preventDefault();
+                    var nom = $('#nom').val();
+                    var prenom = $('#prenom').val();
+                    var email = $('#email').val();
+                    if(nom != "" && email != ""){
+                        data = {
+                            'nom'       : nom,
+                            'prenom'    : prenom,
+                            'email'     : email, 
+                            'event_id'  : '{{ event.id }}' 
+                        }
+                        $.ajax({
+                            url     : "/calendars/event/participate",
+                            type    : "POST",
+                            data    :data, 
+                            success : function(response){
+                                
+                                if(response == "error mail"){
+                                    $('.info p').text('Veuillez renseigner un email valide');
+                                    $('.info').fadeIn();
+                                }else if(response == "error:exist"){
+                                    $('.info p').text('Vous êtes déjà un participant');
+                                    $('.info').removeClass("bg-danger");
+                                    $('.info').addClass("bg-success");
+                                    $('.info').fadeIn();
+                                    $('#participer').find('span').show();
+                                    setTimeout(function(){
+                                        $('.info').removeClass("bg-success");
+                                        $('.info').addClass("bg-danger");
+                                        $('.info').fadeOut();
+                                        $('#register_person_modal').modal('hide');
+                                    },3000)
+                                }else if(response == "ok"){
+                                    $("#create_part")[0].reset();
+                                    load_nombre_participant();
+                                    $('#register_person_modal').modal('hide');
+                                    $('#participer').find('span').show();
+                                }
+                            }, 
+                            error : function(){
+                                console.log("error add participant");
+                            }
+                        })
+                    }
+                    else{
+                        $('.info p').text('Veuillez renseigner les champs nom et email');
+                        $('.info').fadeIn();
+                    }
+                })
+                $('#register_person_modal form input').focus(function(){
+                    $('.info').fadeOut();
+                })
+               
+            })
+        })
+    </script>
+{% endblock %}

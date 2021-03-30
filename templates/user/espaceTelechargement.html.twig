@@ -1,0 +1,190 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.1.4/css/fileinput.min.css" integrity="sha512-iPac4HfczXMa0qW1F34D91WysfdyjgbvopGdZcW0IlTwxgfLrFmxnQFThIASKs72aAHm5WVODsZZMrx+tgE+iw==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="{{ asset('assets/bootstrap4-glyphicons/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css') }}">
+{% endblock %}
+
+{% block title %}Téléchargement et partage de dossiers{% endblock %}
+{% block metaTitle %}téléchargement et partage de dossiers{% endblock %}
+{% block meta %}TribADD vous permet de télécharger, partager et sauvegarder des dossiers ou documents entre membres dans une communauté. En quelques clics vous aurez tout.{% endblock %}
+{% block body %}
+<div class="main">
+    <div class="header-comm-sm">
+        <div class="community-form-container-sm">
+            <div class="container-menu">
+                {% block container_sm %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <h3 class="text-comm">rassemblez votre tribu</h3>
+    </div>
+    <div class="community-form-container">
+        <div class="sub-container"></div>
+        <div class="container-menu">
+            {% block container %}{{ parent() }}{% endblock %}
+        </div>
+    </div>
+    <div class="community-container">
+        <div class="community-header">
+            <div class="community-background d-flex justify-content-center align-items-center">
+                <div class="water loader-md"></div>
+                <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+            </div>
+            <div class="community-title">
+                <div class="community-profil d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp  communaute" class="d-none">
+                </div>
+                {% if app.user %}
+                    {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                        <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                    {% endif %}
+                {% endif %}
+                <div class="community-description">
+                    <h1 id="title">{{ communaute.titre }}</h1>
+                    <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                    <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                    <p id="short-description">{{ communaute.descCourt }}</p>
+                </div>
+            </div>
+        </div>
+        {% include 'user/navbar.html.twig' with {'downloadSpace': ' disabled'} %}
+        <hr class="separator">
+        <div class="container mr-3 mt-2 ml-0">
+            <h3 class="ml-2">Espace de téléchargement</h3>
+            <div class="file-manager-container mt-4">
+            {% if app.user and app.user == communaute.user or app.user and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.creation == 1 %}
+                <div class="file-manager-header">
+                    <nav class="navbar navbar-expand navbar-light bg-light">
+                        <div class="collapse navbar-collapse">
+                            <a title="ajouter un fichier" class="btn btn-outline-success show-file-input" href="#"><i class="fa fa-plus-circle"></i></a>
+                            {#<form class="form-inline ml-auto">
+                                <input class="form-control" type="search" placeholder="rechercher" aria-label="rechercher">
+                                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                            </form>#}
+                        </div>
+                    </nav>
+                </div>
+                {% endif %}
+                <div class="file-manager-content mt-4">
+                    {% if app.user and app.user == communaute.user or app.user and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.creation == 1 %}
+                        <div class="col-md-12 add-file px-5" style="display: none">
+                            <div class="file-loading">
+                                <input id="file-input" name="file[]" type="file" multiple>
+                            </div>
+                        </div>
+                        <hr>
+                    {% endif %}
+                    <div class="row m-3 file-wrapper">
+                        {{ render(path('_files', {id: communaute.id})) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.1.4/js/fileinput.min.js" integrity="sha512-yLD+PqEyjv+TMfhD9sJ2c7hEp10omIrUgEJm+m68/ryVFZJtcQubBNClRmBHqAfiYQfciHQQEAWyTLy5NnrRVw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.1.4/js/locales/fr.min.js" integrity="sha512-ESXSl0iF9mVMobm5bUMzPsNmSYCNJwRyXx4R+5iSfPu5bWGkvHvchMWf3JidFIbUhaj/iK5LimcJwYYhCF9JzQ==" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function () {
+            $('#file-input').fileinput({
+                {#allowedFileExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'mp3', 'wav', 'txt'],#}
+                language: 'fr',
+                uploadUrl: "{{ path('downloadSpace', {'urlPublic': communaute.urlPublic}) }}",
+                uploadAsync: true,
+                overwriteInitial: false,
+                minFileCount: 1,
+                maxFileCount: 5,
+                maxFileSize: 5000,
+                showZoom: false,
+                browseOnZoneClick: true,
+                initialPreviewAsData: true,
+                previewFileIcon: '<i class="fas fa-file"></i>',
+                previewFileIconSettings: {
+                    'doc': '<i class="fas fa-file-word text-primary"></i>',
+                    'xls': '<i class="fas fa-file-excel text-success"></i>',
+                    'ppt': '<i class="fas fa-file-powerpoint text-danger"></i>',
+                    'pdf': '<i class="fas fa-file-pdf text-danger"></i>',
+                    'zip': '<i class="fas fa-file-archive text-muted"></i>',
+                    'htm': '<i class="fas fa-file-code text-info"></i>',
+                    'txt': '<i class="fas fa-file-text text-info"></i>',
+                    'mov': '<i class="fas fa-file-movie-o text-warning"></i>',
+                    'mp3': '<i class="fas fa-file-audio text-warning"></i>',
+                    'apk': '<i class="fas fa-android text-success"></i>',
+                    'jpg': '<i class="fas fa-file-image text-danger"></i>',
+                    'gif': '<i class="fas fa-file-image text-warning"></i>',
+                    'png': '<i class="fas fa-file-image text-primary"></i>'
+                },
+                previewFileExtSettings: {
+                    'doc': function(ext) {
+                        return ext.match(/(doc|docx)$/i);
+                    },
+                    'xls': function(ext) {
+                        return ext.match(/(xls|xlsx)$/i);
+                    },
+                    'ppt': function(ext) {
+                        return ext.match(/(ppt|pptx)$/i);
+                    },
+                    'zip': function(ext) {
+                        return ext.match(/(zip|rar|tar|gzip|gz|7z)$/i);
+                    },
+                    'htm': function(ext) {
+                        return ext.match(/(php|js|css|htm|html)$/i);
+                    },
+                    'txt': function(ext) {
+                        return ext.match(/(txt|ini|md)$/i);
+                    },
+                    'mov': function(ext) {
+                        return ext.match(/(avi|mpg|mkv|mov|mp4|3gp|webm|wmv)$/i);
+                    },
+                    'mp3': function(ext) {
+                        return ext.match(/(mp3|wav)$/i);
+                    },
+                }
+            }).on('fileuploaded', function(event, data, id, index) {
+                $('.file-wrapper').load("{{ path('_files', {id: communaute.id}) }}")
+            }).on('filedeleted', function () {
+                $('.file-wrapper').load("{{ path('_files', {id: communaute.id}) }}")
+            });
+        })
+        $('.show-file-input').on('click', function (e) {
+            e.preventDefault()
+            $('.add-file').toggle(300)
+        })
+        const fetchAction = async function (url, data = {}) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    "content-type": "application/json"
+                },
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                return response.json()
+            } else {
+                let error = await response.json();
+                throw new Error(error.message)
+            }
+        }
+        const fileRemove = async function (e) {
+            e.preventDefault()
+            if (!confirm("Voulez-vous vraiment supprimer le fichier ?")) return
+            let file = $(e.target).closest('.file-preview-frame')
+            let id = file.data('id')
+            let response = await fetchAction("/in/remove/file/".concat(id))
+            if (response.result === 'success') {
+                file.fadeOut("slow", function () {
+                    file.remove()
+                    const wrapper = document.querySelector('.file-wrapper')
+                    const h2 = document.createElement('h2')
+                    h2.textContent = 'VIDE'
+                    if (wrapper.querySelectorAll('.file-preview-frame').length < 1)
+                        wrapper.appendChild(h2)
+                })
+            }
+        }
+    </script>
+{% endblock %}

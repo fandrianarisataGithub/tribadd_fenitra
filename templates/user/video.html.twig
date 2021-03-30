@@ -1,0 +1,139 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <style>
+        .v {
+            transition: all .2s ease-in-out;
+        }
+
+        .v:hover {
+            transform: scale(1.2);
+        }
+    </style>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.1.4/css/fileinput.min.css"
+          integrity="sha512-iPac4HfczXMa0qW1F34D91WysfdyjgbvopGdZcW0IlTwxgfLrFmxnQFThIASKs72aAHm5WVODsZZMrx+tgE+iw=="
+          crossorigin="anonymous"/>
+    <link rel="stylesheet"
+          href="{{ asset('assets/bootstrap4-glyphicons/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css') }}">
+{% endblock %}
+{% block title %}{{ communaute.titre }}{% endblock %}
+{% block metaTitle %}{{ communaute.titre }}{% endblock %}
+{% block meta %}{{ communaute.descCourt }}{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none"
+                         src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}"
+                         alt="pdc communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}"
+                             alt="pdp  communaute" class="d-none">
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'showVideo': ' disabled'} %}
+            <hr class="separator">
+            {% if app.user %}
+                {% if app.user == communaute.user or membre is not null and membre.role is not null and membre.role.droitsUtilisateur.creation == 1 %}
+                    <div class="create-community">
+                        <a href="{{ path('newVideo',{urlPublic:communaute.urlPublic}) }}" class="btn bt-sm btn-yellow">Ajouter une
+                            vidéo</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div class="row">
+                {% for v in communaute.videos|reverse %}
+                    <!-- Gallery item -->
+                    <div class="col-lg-4 col-md-4 col-sm-6 mb-5">
+                        <div class="bg-white rounded shadow-sm"><a href="{{ path('voirVideo',{urlPublic: communaute.urlPublic, id:v.id}) }}"><img
+                                        style="border-radius: 9px"
+                                        src="{{ v.image is null? asset('miniature/video.jpg'):asset('miniature/'~v.image) }}"
+                                        class="img-fluid card-img-top grow" alt="image de miniature"/></a>
+                            <div class="p-4 d-flex flex-column" style="height: 160px">
+                                <h5><a href="#" class="text-dark">{{ v.titre }}</a></h5>
+                                <p class="small desc-video text-muted mb-0">{{ v.description }}</p>
+                                <div class="d-flex align-items-center rounded-pill bg-light px-3 py-2 mt-auto">
+                                    <p class="small mb-0"><i class="fa fa-picture-o mr-2"></i><span
+                                                class="font-weight-bold">{{ v.createdAt|date('d-m-y h:i') }}</span></p>
+                                    {% if app.user == communaute.user or membre is defined and membre is not null and membre.role is not null %}
+                                        <a href="{{ path('viewVideo', {urlPublic: communaute.urlPublic, id: v.id}) }}"
+                                           class="btn bg-blue-ui text-white ml-auto">Voir</a>
+                                    {% endif %}
+                                    {% if app.user == communaute.user or membre is defined and membre is not null and membre.role is not null %}
+                                        {# <a class="v" target="_blank" href="/videos/{{ v.fichier }}"><img width="40px" src="{{ asset('assets/image/download.png') }}"></a> #}
+                                        <a class="btn btn-sm ml-1 btn-default btn-outline-secondary" target="_blank"
+                                           href="/videos/{{ v.fichier }}"><i
+                                                    class="glyphicon glyphicon-download"></i></a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-md-12">
+                        <h3>Aucune vidéo a été trouvée</h3>
+                    </div>
+                    <!-- End -->
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+        const miniatures = document.querySelectorAll('.thumb')
+        for (let i = 0; i < miniatures.length; i++) {
+            cropImage(miniatures[i], miniatures[i].querySelector('img'))
+        }
+        const fetchAction = async function (url, data = {}) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    "content-type": "application/json"
+                },
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                return response.json()
+            } else {
+                let error = await response.json()
+                throw new Error(error.message)
+            }
+        }
+    </script>
+{% endblock %}
+

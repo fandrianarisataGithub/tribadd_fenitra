@@ -1,0 +1,46 @@
+<input type="hidden" name="countMsg" value="{{ messages|length < 10 ? '0' ~ messages|length : messages|length }}">
+{% for message in messages if app.user %}
+{% if message.user == app.user %}
+    {#{% if message.files|length == 0 %}#}
+        <div class="d-flex justify-content-end message">
+            <div class="msg_cotainer_send" style="float: right;">
+                <span class="msg_user">{{ message.user.username }}</span>
+                {% if message.files|length > 0 %}
+                    <div class="file">
+                        {% for f in message.files %}
+                            <a target="_blank" href="{{ asset('files/' ~ f) }}"><div class="f"> {{ f }}</div></a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if message.contenu != '' %}
+                    <div class="message-text-send mt-2">{{ message.contenu }}</div>
+                {% endif %}
+                <span class="msg_time_send text-muted float-right">{{ message.createdAt|date('d-M-Y h:i') }}</span>
+            </div>
+            <div class="img_cont_msg">
+                <img alt="photo2" src="{{ message.user.photo is not null ? asset('photo_de_profil/' ~ message.user.photo) : asset('assets/image/user.png') }}" class="rounded-circle sender-img user_img_msg">
+            </div>
+        </div>
+{% else %}
+<div class="d-flex justify-content-start message">
+    <div class="img_cont_msg position-relative">
+        <img alt="photo2" src="{{ message.user.photo is not null ? asset('photo_de_profil/' ~ message.user.photo) : asset('assets/image/user.png') }}" class="rounded-circle user_img_msg">
+        <span class="online_icon"></span>
+    </div>
+    <div class="msg_cotainer">
+        <span class="msg_user">{{ message.user.username }}</span>
+        {% if message.files|length > 0 %}
+            <div class="file">
+                {% for f in message.files %}
+                    <a target="_blank" href="{{ asset('files/' ~ f) }}"><div class="f float-left"> {{ f }}</div></a>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if message.contenu != '' %}
+            <div class="message-text mt-2">{{ message.contenu }}</div>
+        {% endif %}
+        <span class="msg_time text-muted">{{ message.createdAt|date('d-m-y h:i') }}</span>
+    </div>
+</div>
+{% endif %}
+{% endfor %}

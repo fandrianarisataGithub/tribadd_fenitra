@@ -1,0 +1,275 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('calendar_css/calendar.css') }}">
+{% endblock %}
+{% block title %}{{ communaute.titre }}- {% if modif is defined and modif == true %}
+Modification d'évènement
+{% else %}
+Ajout d'évènement
+{% endif %} {% endblock %}
+{% block meta %}{{ communaute.descCourt }}{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp communauté" class="d-none">
+                    </div>
+                     {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h2 id="title">{{ communaute.titre }}</h2>
+                        <h5 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h5>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' %}
+            <hr class="separator">
+            <div class="community-body">
+                <div class="col-md-12">
+                    {% if modif is defined and modif == true  %}
+                        <h3 class="text-uppercase mb-3">Modification de l'évènement</h3>
+                        {% else %}
+                        <h3 class="text-uppercase mb-3">Nouvel évènement</h3>
+                    {% endif %}
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'form-edit', 'id': 'form_edit'}}) }}
+                        <div class="form-group">
+                            <label for="image_encadre">Image mise en avant</label>
+                            <input type="file" id="image_encadre" class="d-none" name="image">
+                            <div class="preview-image m-0 d-flex justify-content-center align-items-center" style="width: 177px; height: 175px; overflow: hidden; border-radius: 8%">
+                                {% if event is defined and event is not null %}
+                                    <img src="{{ event.image is null ? asset('assets/image/empty-image-min.jpg'): asset('events/' ~ event.image) }}" 
+                                    alt="photo article" id="img_preview" onclick="fileOpen(event)" style="cursor: pointer; border-radius: 8%" class="w-100">
+                                {% else %}
+                                    <img src="{{ asset('assets/image/empty-image-min.jpg') }}" 
+                                    alt="photo article" id="img_preview" onclick="fileOpen(event)" style="cursor: pointer; border-radius: 8%" class="w-100">
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div id="div_fb">
+                                {{ form_label(form.title, 'Couleur') }}
+                                {{ form_widget(form.couleur_fond) }}
+                            </div>
+                            {{ form_errors(form.couleur_fond) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.title, 'Titre') }}
+                            {{ form_widget(form.title) }}
+                            {{ form_errors(form.title) }}
+                            <div id="k51"></div>
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.lieu, 'Lieu') }}
+                            {{ form_widget(form.lieu) }}
+                            {{ form_errors(form.lieu) }}
+                            <div id="k511lieu"></div>
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.date_debut, 'Date de début') }}
+                            {{ form_widget(form.date_debut) }}
+                            {{ form_errors(form.date_debut) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.date_fin, 'Date de fin') }}
+                            {{ form_widget(form.date_fin) }}
+                            {{ form_errors(form.date_fin) }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form_widget(form.description, {'attr': {'rows': '4','class': 'contenu summernote'}}) }}
+                            {{ form_errors(form.description) }}
+                            <div id="k160"></div>
+                        </div>
+                        <input type="submit" id="publier" class="btn btn-sm btn-yellow" value="Créer">
+                        <a href="{{ path('newEvent', {communaute_id: communaute.id}) }}" class="btn btn-sm btn-outline-secondary">Annuler</a>
+                        {# <a href="{{ path('userShowArticles', {urlPublic: communaute.urlPublic}) }}" class="btn btn-sm btn-outline-secondary">Annuler</a> #}
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+                
+                $('.contenu').summernote({
+                    tabsize: 2,
+                    height:200,
+                    placeholder: 'Contenu'
+                });
+                $('.comment-content').autolink();
+            
+            });
+        </script>
+    <script type="text/javascript">
+        $(function() {
+             $('#form_title').on('input', function() {
+                 var titre = $(this).val();
+                 var cal = titre.length;
+                  if (cal > 51) {
+                      $('#k51').html();
+                    $('#k51').html('<p style="color:red;">La taille du titre ne doit pas dépasser les 51 caractères</p>');
+                    e.preventDefault();
+                  }else{
+                     $('#k51').html();
+                     var text = "Vous avez saisi "+cal+"/51 caractères";
+                      $('#k51').html('<p>'+text+'</p>');
+                  }
+             });
+
+             $('#form_lieu').on('input', function() {
+                var titre = $(this).val();
+                var cal = titre.length;
+                 if (cal > 51) {
+                     $('#k511lieu').html();
+                   $('#k511lieu').html('<p style="color:red;">La taille du lieu ne doit pas dépasser les 51 caractères</p>');
+                   e.preventDefault();
+                 }else{
+                    $('#k511lieu').html();
+                    var text = "Vous avez saisi "+cal+"/51 caractères";
+                     $('#k511lieu').html('<p>'+text+'</p>');
+                 }
+            });
+
+            $('#publier').click(function(e){
+                var titre = $('#form_title').val();
+                var description = $('#form_description').val();
+
+                if (titre.length >= 51) {
+                      $('#k51').html('<p>La taille du titre ne doit pas dépasser les 51 caractères</p>');
+                     e.preventDefault();
+                }
+                /*if (description.length >= 160) {
+                   $('#k160').html("<p>La taille d'introduction ne doit pas dépasser les 160 caractères</p>");
+                     e.preventDefault();
+                }*/
+             });
+          });
+            function fileOpen(e) {
+                e.preventDefault()
+                $('input[name="image"]').click()
+            }
+        (function () {
+            const canvas = $('canvas')[0];
+            const ctx = canvas.getContext('2d');
+            let img;
+            const container = document.querySelector('.preview-image')
+            const origin = document.querySelector('#img_preview')
+
+            $('#image_encadre').change(function() {
+                handleFiles(this.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    var file = files[0];
+                    if (
+                        typeof FileReader !== 'undefined' &&
+                        file.type.indexOf('image') != -1
+                    ) {
+                        var reader = new FileReader();
+                        // Note: addEventListener doesn't work in Google Chrome for this event
+                        reader.onload = function(evt) {
+                            load(evt.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                } else {
+                    load("{{ asset('assets/image/empty-image-min.jpg') }}")
+                }
+            }
+
+            function load(src) {
+                if (src.match(/assets\/image\/empty-image-min\.jpg/i)) {
+                    origin.setAttribute('src', src)
+                    return false
+                }
+                $(origin).addClass('d-none')
+                $(container).find('div.water').removeClass('d-none')
+                img = new Image();
+                img.onload = function() {
+                    run();
+                };
+                img.src = src;
+            }
+
+            function run() {
+                if (!img) return;
+                var options = {
+                    width: container.offsetWidth,
+                    height: container.offsetHeight,
+                    minScale: 1,
+                    ruleOfThirds: true,
+                    debug: true
+                };
+                var analyzeOptions = analyze.bind(this, options);
+                analyzeOptions();
+            }
+            function analyze(options) {
+                smartcrop.crop(img, options, draw);
+            }
+
+            function draw(result) {
+                var selectedCrop = result.topCrop;
+                drawCrop(selectedCrop);
+            }
+
+            function drawCrop(crop) {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+                ctx.drawImage(
+                    img,
+                    crop.x,
+                    crop.y,
+                    crop.width,
+                    crop.height,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+                $(origin).attr('src', canvas.toDataURL(img.type))
+                $(origin).removeClass('d-none')
+                $(container).find('div.water').addClass('d-none')
+            }
+        })()
+        $(document).ready(function() {
+            $('#form_contenu').summernote({
+                tabsize: 2,
+                minHeight: 200,
+                placeholder: 'Contenu'
+            });
+        });
+    </script>
+{% endblock %}

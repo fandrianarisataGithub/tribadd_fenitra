@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" >
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+      <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/image/logo tribAdd.png') }}" />
+    <title>{% block title %}TribADD :Rassemblez votre tribu{% endblock %}</title>
+    <meta name="title" content="TribADD :{% block metaTitle %}{% endblock %}"/>
+    <meta name="description" content="{% block meta %} {% endblock %}"/>
+    {% block stylesheets %}
+    {% endblock %}
+    {% block script %}{% endblock %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-190276209-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-190276209-1');
+    </script>
+    <style>
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 25px;
+            width: 25px;
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body class="body-comm">
+<canvas class="d-none"></canvas>
+<div class="header-comm">
+    <div class="background-logo">
+        <a title="accueil" href="{{ path('home') }}">
+            <img class="logo-comm" src="{{ asset('assets/image/logo tribAdd.png') }}" alt="logo">
+        </a>
+    </div>
+    <div class="sub-header-comm">
+        <h2 class="text-comm">rassemblez votre tribu</h2>
+        <div class="header-comm-menu">
+            <form action="{{ path('recherce') }}" method="post" class="mr-1">
+                <div class="wrap">
+                    <div class="search">
+                        <input name="mot-cle" type="text" autocomplete="off" class="searchTerm" placeholder="Recherche...">
+                        <button type="submit" class="searchButton">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            {% if app.user %}
+                <div class="photo-profile">
+                    <img class="rounded-circle d-none" src="{{ app.user.photo is null ? asset('assets/image/user.png') : asset('photo_de_profil/' ~ app.user.photo) }}" alt="pdp circle" id="pdp">
+                </div>
+                <span class="text-white mr-2">{{ '' != app.user.prenom ? app.user.prenom|capitalize : app.user.username }}</span>
+                <div class="dropdown disconnect">
+                    <span class="btn-disconnect arrow-down" data-toggle="dropdown"></span>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <div class="mb-2">
+                            <a target="_blank" style="font-weight: bold" class="dropdown-item" href="{{ path('myProfile') }}" >Mon profil</a>
+                        </div>
+                        <div>
+                            <a target="_blank" style="font-weight: bold" class="dropdown-item" href="{{ path('home') }}" >Communautés</a>
+                        </div><hr>
+                        {% set currentPath =  path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+                        <a style="font-weight: bold" class="dropdown-item" href="{{ path('logout',{url: currentPath}) }}" >Déconnexion
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="content">
+    {% set currentPath = path(app.request.attributes.get('_route'),
+        app.request.attributes.get('_route_params')) %}
+    <nav class="sub-body-sm"></nav>
+    {% block body %}
+        {% block container_sm %}
+            {% if app.user %}
+               {% if app.user == communaute.user or membre is defined and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                    <p class="welcome-leader"><strong>Bienvenue au chef de la tribu !</strong></p>
+                    <a class="btn btn-yellow" href="{{ path('showMembres', {urlPublic: communaute.urlPublic}) }}" >Gérer les membres</a>
+                    <div class="text">
+                        <p>Nombre de membres: {{ communaute.membres|length + 1 }}</p>
+                    </div>
+                    <div class="quit-comm ml-2 mb-3">
+                        <a  href="#" style="font-size: 14px;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                    </div>
+                {% elseif membre is defined and membre is not null %}
+                    {% if membre.role is null %}
+                        <div class="text">
+                            <h6 class="text-danger">Vos actions sont restreintes</h6>
+                        </div>
+                    {% else %}
+                    <div class="text">
+                        <h6>Vous êtes {{ membre.role.libelle }}</h6>
+
+                        {% if membre.role.libelle == 'administrateur' %}
+                        <a class="btn btn-yellow mb-2" href="{{ path('showMembres', {urlPublic: communaute.urlPublic}) }}" >Gérer les membres</a>
+                        {% endif %}
+                        <p>Nombre de membres: {{ communaute.membres|length + 1 }}</p>
+                        <div class="dropright">
+                            <button class="btn btn-sm btn-danger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-times"></i></button>
+                             <div class="quit-comm ml-2 mb-2">
+                                <a  href="#" style="font-size: 14px;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                            </div>
+                            <span class="quit-comm dropdown-menu">Quitter la tribu <a onclick="quitTribe(event)" href="{{ path('ShowmyCommunaute', {urlPublic: communaute.urlPublic, linkQuit: app.user.id, route: currentPath}) }}" class="btn-link">ici</a></span>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <a class="btn btn-yellow" href="{{ path('ShowmyCommunaute', {urlPublic: communaute.urlPublic, linkRejoindre: app.user.id, route: currentPath}) }}" >devenir membre</a>
+                    <div class="text">
+                        <p>Nombre de membres: {{ communaute.membres|length + 1 }}</p>
+                    </div>
+                {% endif %}
+                <div class ="ajouter_membre">
+                    <a href="#" class="btn btn-yellow mb-4 w-fit-content">Ajouter des membres</a>
+                </div>
+            {% else %}
+                <div class="text">
+                    <h6>Connectez-vous pour rejoindre la tribu</h6>
+                    <span>Nombre de membres: {{ communaute.membres|length + 1 }}</span>
+                </div>
+            {% endif %}
+
+        {% endblock %}
+        {% block loginSm %}
+            {% if app.user == null %}
+                {% set currentPath =  path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+                <div class="form-login-sm">
+                    <form class="login-form" method="post" action="">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        <div class="form-header">
+                            <img src="{{ asset('assets/image/tete-removebg-preview.png') }}" alt="photo2">
+                        </div>
+                        <div class="form-body">
+                            <h5 class="form-body-title">se connecter</h5>
+                            {% if error is defined %}
+                                <h5 class="text-danger text-center">
+                                    l'authentification n'est pas validé
+                                </h5>
+                            {% endif %}
+                            <input class="form-control" type="hidden" name="path" value="{{ currentPath }}">
+                            <input type="text" class="form-control mb-3" name="_username" placeholder="nom d'utilisateur" {% if lastUsername is defined %}value="{{ lastUsername }}"{% endif %} required>
+                            <input type="password" class="form-control" name="_password" placeholder="mot de passe" required>
+                            <div class="g-recaptcha" data-sitekey='6LdnoP8ZAAAAAO-nSKyWryqEU7RV0xClG3JWaLc8'></div>
+                            <input type="submit" name="login" style="display: none">
+                            <button class="btn btn-yellow mx-auto" onclick="event.preventDefault(); document.querySelector('.form-login-sm input[type=\'submit\']').click()">connexion</button>
+                            <a href="{{ path('passForgot') }}" class="form-mdp-forgot" >mot de passe oublié?</a>
+                            <a href="{{ path('registerUser') }}" class="form-sing-up" >s'inscrire</a>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+        {% endblock %}
+        {% block container %}
+
+            {% if app.user %}
+
+                {% if app.user == communaute.user or membre is defined and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+
+                        <p class="text-center"><strong>Bienvenue au chef de la tribu !</strong></p>
+
+                        <a class="btn btn-yellow" href="{{ path('showMembres', {urlPublic: communaute.urlPublic}) }}" >Gérer les membres</a>
+
+                        <div class="text">
+
+                            <p>Nombre de membres: {{ communaute.membres|length + 1 }}</p>
+
+                        </div>
+                         <div class="quit-comm ml-2 mb-3">
+                            <a  href="#" style="font-size: 14px;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                        </div>
+
+                    {% elseif membre is defined and membre is not null %}
+
+                        {% if membre.role is null %}
+
+                            <div class="text">
+
+                                <h6 class="text-danger">Vos actions sont restreintes</h6>
+
+                            </div>
+                              <div class="quit-comm ml-2 mb-3">
+                                    <a  href="#" style="font-size: 14px;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                            </div>
+
+                        {% else %}
+
+                        <div class="text">
+
+                            <h6>Vous êtes {{ membre.role.libelle }}</h6>
+                            {% if membre.role.libelle == 'administrateur' %}
+                                <a class="btn btn-yellow mb-2" href="{{ path('showMembres', {urlPublic: communaute.urlPublic}) }}" >Gérer les membres</a>
+                            {% endif %}
+                            <p>Nombre de membres: {{ communaute.membres|length + 1 }}</p>
+                            <a style="display: none" href="{{ path('subscribeCommunauty', {id:membre.id}) }}" class="btn btn-yellow js-abonnee">s'abonner à la newsletter</a>
+                            <div class="divNewsLetter">
+                                <label class="">
+                                    <input {% if communaute.isAbonneNewsLetter(app.user) %} data-news = "1" checked {% else %}data-news = "0" {% endif %} class="checkNews" name="checkNews" type="checkbox">
+                                    <span class="checkmark"></span>
+                                    Abonné(e) à la newsletter
+                                </label>
+                            </div>
+                             <div class="quit-comm">
+                                  <span class="mb-1">
+                                        <a  href="#" style="font-size: 14px;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                                </span>
+                               <span> Quitter la tribu <a onclick="quitTribe(event)" href="{{ path('ShowmyCommunaute', {urlPublic: communaute.urlPublic, linkQuit: app.user.id, route: currentPath}) }}" class="btn-link">ici</a></span>
+                            </div>
+                        </div>
+                     {% endif %}
+                     {% else %}
+
+                         <a class="btn btn-yellow" href="{{ path('ShowmyCommunaute', {urlPublic: communaute.urlPublic, linkRejoindre: app.user.id, route: currentPath, params: app.request.get('id')}) }}" >devenir membre</a>
+                         <div class="text">
+                             <p>Nombre de membres: {{ communaute.membres|length + 1 }}</p>
+                         </div>
+                            <div class="quit-comm ml-2 mb-3">
+                                    <a  href="#" style="font-size: 14px;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                            </div>
+                    {% endif %}
+                    <div class="ajouter_membre">
+                        <a href="#" class="btn btn-yellow mb-4 w-fit-content">Ajouter des membres</a>
+                    </div>
+            {% else %}
+                <div class="text">
+
+                        <h6>Connectez-vous pour rejoindre la tribu</h6>
+                        <span>Nombre de membres: {{ communaute.membres|length + 1 }}</span>
+                    </div>
+                    {% set currentPath =  path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+                <div class="form-login">
+                    <form class="login-form" method="post" action="">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        <div class="form-header">
+                            <img src="{{ asset('assets/image/tete-removebg-preview.png') }}" alt="photo2">
+                        </div>
+                        <div class="form-body">
+                            <h5 class="form-body-title">se connecter</h5>
+                            {% if error is defined %}
+                                <h5 class="text-danger text-center">
+                                    l'authentification n'est pas valid
+                                </h5>
+                            {% endif %}
+                            
+                            <input class="form-control" type="hidden" name="path" value="{{ currentPath }}">
+                            <input type="text" class="form-control mb-3" name="_username" placeholder="nom d'utilisateur" {% if lastUsername is defined %}value="{{ lastUsername }}"{% endif %} required>
+                            <input type="password" class="form-control" name="_password" placeholder="mot de passe" required>
+                            <div class="g-recaptcha" data-sitekey='6LdnoP8ZAAAAAO-nSKyWryqEU7RV0xClG3JWaLc8'></div>
+
+                            <input type="submit" name="login" style="display: none">
+
+                            <button class="btn btn-yellow mx-auto" onclick="event.preventDefault(); document.querySelector('.form-login input[type=\'submit\']').click()">connexion</button>
+
+                            <a href="{{ path('passForgot') }}" class="form-mdp-forgot" >mot de passe oublié?</a>
+
+                            <a href="{{ path('registerUser',{id: communaute.id}) }}" class="form-sing-up" >s'inscrire</a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+                <div class="quit-comm ml-2 mb-3">
+                        <a  href="#" style="font-size: 14px;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                </div>
+
+            {% endif %}
+
+            <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+              <div class="modal-dialog" role="document" style="max-width: 700px;">
+                <div class="modal-content">
+                  <div class="modal-body">
+                     {% include 'user/cgu.html.twig' %}
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-yellow" data-dismiss="modal">Fermer</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+        {% endblock %}
+
+    {% endblock %}
+
+</div>
+
+{% if app.user %}
+
+{% endif %}
+<script src="{{ asset('assets/jquery/jquery.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+{#<script src="{{ asset('assets/script/jquery.facedetection.min.js') }}"></script>#}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/smartcrop/2.0.3/smartcrop.min.js" integrity="sha512-5tphGdlRPoaPKOe2Cooc4+zrNoXkW6sMN8uBgYgC5NGe9DfKQ2DbfMATa9fFl/eLDDSRDXSLARY5TDksDF/lug==" crossorigin="anonymous"></script>
+<script src="{{ asset('assets/script/cropImage.js') }}"></script>
+<script type="text/javascript">
+    {% if app.user %}
+        cropImage(document.querySelector('.photo-profile'), document.querySelector('.photo-profile').querySelector('img'))
+    {% endif %}
+    if (document.querySelector('.community-profil'))
+        cropImage(document.querySelector('.community-profil'), document.querySelector('.community-profil').querySelector('img'))
+    if (document.querySelector('.community-background'))
+        cropImage(document.querySelector('.community-background'), document.querySelector('.community-background').querySelector('img'))
+    let modal = null
+    const focusableSelector = 'button, a, input, textarea'
+    let focusables = []
+    const openModal = function (e) {
+        e.preventDefault()
+        modal = document.querySelector(e.target.getAttribute('href'))
+        if (e.target.tagName.toLowerCase() === 'i')
+            modal = document.querySelector(e.target.parentNode.getAttribute('href'))
+        focusables = Array.from(modal.querySelectorAll(focusableSelector))
+        modal.style.display = null
+        modal.removeAttribute('aria-hidden')
+        modal.setAttribute('aria-modal', 'true')
+        modal.addEventListener('click', closeModal)
+        modal.querySelector('.js-modal-stop').addEventListener('click', stopPropagetion)
+    };
+
+    const closeModal = function (e) {
+        if (modal === null) return
+        e.preventDefault()
+        modal.style.display = 'none'
+        modal.setAttribute('aria-hidden', 'true')
+        modal.removeAttribute('aria-modal')
+        modal.removeEventListener('click', closeModal)
+        modal.querySelector('.js-modal-stop').removeEventListener('click', stopPropagetion)
+        modal = null
+    }
+    const stopPropagetion = function (e) {
+        e.stopPropagation()
+    }
+        const focusModal = function (e) {
+        e.preventDefault()
+        let index = focusables.findIndex(f => f === modal.querySelector(':focus'))
+        index++
+        if (index >= focusables.length) {
+            index = 0
+        }
+        focusables[index].focus()
+    };
+    document.querySelectorAll('.js-modal').forEach(a => {
+        a.addEventListener('click', openModal)
+    });
+
+    window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+            closeModal(e)
+        }
+        if (e.key === 'Tab' && modal != null) {
+
+            focusModal(e)
+
+        }
+    });
+    $(document).ready(function() {
+        $(".dropdown").on("hide.bs.dropdown", function() {
+            $(".btn-disconnect").removeClass('arrow-up').addClass('arrow-down');
+
+        }).on("show.bs.dropdown", function(){
+            $(".btn-disconnect").removeClass('arrow-down').addClass('arrow-up');
+        });
+    });
+    function quitTribe(e) {
+        if (confirm('Voulez-vous vraiment quiter cette tribu ?')) {
+        } else {
+            e.preventDefault()
+        }
+    }
+    const abonne = document.querySelector('.js-abonnee');
+    const backgrounds = document.querySelector('.background');
+    const imgAbonn = document.querySelector('.imgAbonn');
+    const divNewsLetter = document.querySelector('.divNewsLetter');
+
+    const checkNews = document.querySelector('.checkNews');
+    console.log(checkNews.getAttribute('data-news'))
+    checkNews.addEventListener('click', news)
+
+    function news (evt) {
+        if(checkNews.getAttribute("data-news") == "0"){
+            let url = abonne.href
+            let xhr = new XMLHttpRequest()
+            xhr.open('post', url);
+            xhr.onreadystatechange = function (ev) {
+                if(xhr.readyState === 4 && xhr.status === 200){
+                    divNewsLetter.innerHTML = `
+                                                <label class="">
+                                                <input data-news = "1" checked onclick="news()" class="checkNews" name="checkNews" type="checkbox">
+                                                <span class="checkmark"></span>
+                                                Abonné(e) à la newsletter
+                                                </label>
+                                                `
+                    checkNews.setAttribute('data-news', '1')
+                }else {
+                }
+            };
+            xhr.send()
+        }else{
+            var t = confirm("Voulez-vous vraiment vous désabonner de la newsletter ?")
+            if(t == true){
+                let url = abonne.href
+                let xhr = new XMLHttpRequest();
+                xhr.open('post', url);
+                xhr.onreadystatechange = function (ev) {
+                    if(xhr.readyState === 4 && xhr.status === 200){
+                        divNewsLetter.innerHTML=`
+                                                <label class="">
+                                                <input data-news = "0" onclick="news()" class="checkNews" name="checkNews" type="checkbox">
+                                                <span class="checkmark"></span>
+                                                Abonné(e) à la newsletter
+                                                </label>
+                                                `;
+                        checkNews.setAttribute('data-news', '0')
+                    }
+                };
+                xhr.send()
+            }else {
+                        divNewsLetter.innerHTML=`
+                                                <label class="">
+                                                <input data-news = "1" checked onclick="news()" class="checkNews" name="checkNews" type="checkbox">
+                                                <span class="checkmark"></span>
+                                                Abonné(e) à la newsletter
+                                                </label>
+                                                `;
+                checkNews.setAttribute('data-news', '1')
+            }
+        }
+
+    }
+
+
+</script>
+{% block javascripts %}
+
+{% endblock %}
+
+</body>
+
+</html>
+
+
+
+
+
+
+

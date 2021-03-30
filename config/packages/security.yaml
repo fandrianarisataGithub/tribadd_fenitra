@@ -1,0 +1,45 @@
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    # providers:
+    encoders:
+        App\Entity\User:
+            algorithm: plaintext
+
+    providers:
+        in_database:
+            entity:
+                class: App\Entity\User
+                property: username
+
+    firewalls:
+        main:
+            anonymous: true
+            guard:
+                authenticators:
+                    - App\Security\AppCustomAuthenticator
+            logout:
+                path: deconnexion
+                target: login
+                # where to redirect after logout
+                # target: app_any_route
+
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#firewalls-authentication
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    # access_control:
+        # - { path: ^/connexion, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # - { path: ^/confirme, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # - { path: ^/mot-de-passe-oublie, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # - { path: ^/mot-de-passe-reinitialisation, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # - { path: ^/mot-de-passe-resultat, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # - { path: ^/inscription, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        #- { path: ^/backoffice, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }

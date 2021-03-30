@@ -1,0 +1,583 @@
+{% extends 'layout2.html.twig' %}
+    {% block stylesheets %}
+        <style>
+            .sticky-chat {
+                display: none!important;
+            }
+            .chat{
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+            .card{
+                height: 500px;
+                border-radius: 15px !important;
+                background-color: rgba(0,123,255,0.33) !important;
+            }
+            .msg_card_body{
+                overflow-y: auto;
+            }
+            .card-header{
+                border-radius: 15px 15px 0 0 !important;
+                border-bottom: 0 !important;
+            }
+            .card-footer{
+                border-radius: 0 0 15px 15px !important;
+                border-top: 0 !important;
+            }
+            .container{
+                align-content: center;
+            }
+            .message {
+                margin-bottom: 2.3rem!important;
+            }
+            .type_msg{
+                background-color: rgba(0,0,0,0.3) !important;
+                border:0 !important;
+                height: auto !important;
+                overflow-y: auto;
+            }
+            .type_msg::placeholder {
+                color: #000;
+                opacity: .4;
+            }
+            .type_msg:focus {
+                box-shadow:none !important;
+                outline:0 !important;
+            }
+            .attach_btn{
+                border-radius: 15px 0 0 15px !important;
+                background-color: rgba(0,0,0,0.3) !important;
+                border:0 !important;
+                cursor: pointer;
+            }
+            .send_btn {
+                border-radius: 0 15px 15px 0 !important;
+                background-color: #007bff40 !important;
+                border:0 !important;
+                cursor: pointer;
+            }
+            .contacts li {
+                width: 100% !important;
+                padding: 5px 10px;
+                margin-bottom: 15px !important;
+            }
+            .user_img_msg {
+                height: 40px;
+                width: 40px;
+                border: 2px solid #f5f6fa;
+
+            }
+            .img_cont_msg{
+                height: 40px;
+                width: 40px;
+                margin-top: auto;
+            }
+            .online_icon{
+                position: absolute;
+                height: 12px;
+                width:12px;
+                background-color: #4cd137;
+                border-radius: 50%;
+                bottom: 0;
+                right: 0;
+                border: 2px solid white;
+            }
+            .user_info{
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-left: 15px;
+            }
+            .user_info span{
+                font-size: 20px;
+            }
+            .user_info p{
+                font-size: 10px;
+            }
+            .video_cam{
+                margin-left: 50px;
+                margin-top: 5px;
+            }
+            .video_cam span{
+                font-size: 20px;
+                cursor: pointer;
+                margin-right: 20px;
+            }
+            .msg_cotainer{
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-left: 10px;
+                position: relative;
+            }
+            .msg_cotainer_send{
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-right: 10px;
+                position: relative;
+            }
+            .msg_cotainer, .msg_cotainer_send {
+                display: flex;
+                flex-direction: column;
+                min-width: 30%;
+                max-width: 75%;
+            }
+            .msg_user{
+                position: absolute;
+                top: -20px;
+            }
+            .msg_cotainer .msg_user {
+                left: 10px;
+            }
+            .msg_cotainer_send .msg_user {
+                right: 10px;
+            }
+            .msg_time{
+                position: absolute;
+                right: 15px;
+                top: -15px;
+                font-size: 10px;
+            }
+            .msg_time_send{
+                /*position: absolute;*/
+                /*left:15px;*/
+                /*top: -15px;*/
+                font-size: 10px;
+                margin-top: 5px;
+            }
+            .msg_head{
+                position: relative;
+            }
+            .action_menu ul{
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+            .action_menu ul li{
+                width: 100%;
+                padding: 10px 15px;
+                margin-bottom: 5px;
+            }
+            .action_menu ul li i{
+                padding-right: 10px;
+
+            }
+            .action_menu ul li:hover{
+                cursor: pointer;
+                background-color: rgba(0,0,0,0.2);
+            }
+            @media(max-width: 576px) {
+                .contacts_card {
+                    margin-bottom: 15px !important;
+                }
+            }
+            .image-upload > input {
+                visibility:hidden;
+                width:0;
+                height:0
+            }
+            .image-upload{
+                background-color: #007bff40 !important;
+
+            }
+            .file {
+                /*width: 300px;*/
+                width: 100%;
+            }
+            .f::before {
+                content: "";
+                width: 100px;
+                height: 100px;
+                display: block;
+                background: url("{{ asset('assets/image/unnamed.png') }}") center center / contain no-repeat;
+            }
+
+            .f{
+                white-space: nowrap;
+                margin-bottom: 5px;
+                width: 100px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                height: 115px;
+                background-size: cover;
+                float: right;
+            }
+            .message-text-send {
+                background-color: #78e08f;
+                border-radius: 25px;
+                padding: 10px;
+            }
+            .message-text {
+                background-color: #82ccdd;
+                border-radius: 25px;
+                padding: 10px;
+            }
+            .e{
+                float: right;
+                margin-top: -100px;
+                margin-left: 30px;
+                cursor: pointer;
+            }
+            .e:focus {
+                outline: none;
+                box-shadow: none;
+            }
+        </style>
+    {% endblock %}
+{% block title %}Discussion instantanée entre membres{% endblock %}
+{% block metaTitle %}discussion instantanée entre membres{% endblock %}
+{% block meta %}Sur TribADD, restez en contact permanent avec les membres de votre tribu grâce à la discussion instantanée. Vous pouvez chatter à tout moment {% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp  communaute" class="d-none">
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'chat': ' disabled'} %}
+            <hr class="separator">
+            <div class="row py-3">
+                <div class="col-md-12 col-xl-12 chat">
+                    <div class="card">
+                        <div class="card-header msg_head">
+                            <div class="d-flex">
+                                <div class="user_info">
+                                    <span>Chat</span>
+                                    <small class="d-block count-message"><span class="countMsg">0</span> messages</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body msg_card_body" id="ws-content-receiver">
+                            {{ render(path('_messages',{id: communaute.id})) }}
+                        </div>
+                        <form method="post" action="" enctype="multipart/form-data">
+                            <div class="card-footer">
+                                <div id="pre" class="row"></div>
+                                <div class="input-group">
+                                    <textarea name="contenu" id="ws-content-to-send" class="form-control type_msg" placeholder="Saisissez votre message..." rows="1" style="background-color: #007bff40 !important;"></textarea>
+                                    <div class="input-group-append"  style="height:50px;background-color: #007bff40 !important;">
+                                        <div class="image-upload">
+                                            <label for="file-input" style="margin-top: 5px;">
+                                                <img src="{{ asset('assets/image/file.png') }}" style="pointer-events: none" width="35px" />
+                                            </label>
+                                            <input id="file-input" type="file" name="file[]" multiple/>
+                                            <div id="conFiles">
+
+                                            </div>
+                                            <input name="comm" type="number" style="display: none" value="{{ communaute.id }}">
+                                        </div>
+                                        <span class="input-group-text send_btn" id="ws-send-content"><i class="fas fa-location-arrow"></i></span>
+                                        <!--<input type="button" id="ws-send-content" value="Envoyer" style="display: none;"/>
+                                    <span class="input-group-text send_btn" id="ws-send-content"><i class="fas fa-location-arrow"></i></span>-->
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    {% if app.request.headers.get('referer') is not null %}
+                        <a class="btn btn-yellow ml-auto mr-3 mt-2" href="{{ app.request.headers.get('referer') == absolute_url(path('chat',{urlPublic: communaute.urlPublic})) ? path('user') : app.request.headers.get('referer') }}">retour</a>
+                    {% else %}
+                        <a class="btn btn-yellow ml-auto mr-3 mt-2" href="{{ path('user') }}">retour</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript">
+        var wsUrl = '{{ ws_url }}';
+        var userName = '{{ app.user.username }}'
+    </script>
+    {#<script type="text/javascript" src="{{ asset('/js/sf-websocet.js') }}"></script>#}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/fr-ch.min.js" integrity="sha512-RShwefGZta1jITIgooS2wBJTsMRf08kYS95dtUB1Pc8tiP1JQlX8aV6QFZ/pF0fxKpK8cI26flh5ViOYp7p3yw==" crossorigin="anonymous"></script>
+    <script>
+        const profilePublishers = document.querySelectorAll('.img_cont_msg')
+        for (let i = 0; i < profilePublishers.length; i++) {
+            cropImage(profilePublishers[i], profilePublishers[i].querySelector('img'))
+        }
+        let fichier = [];
+
+        $('#file-input').change(function () {
+            // let v = $('#file-input').val();
+            // let arr = v.split('\\');
+            let taille = $("#file-input")[0].files.length;
+            let files = [];
+
+            for(let i = 0; i < taille; i++){
+                files.push($("#file-input")[0].files[i].name);
+                fichier.push($("#file-input")[0].files[i])
+            }
+            for(let i = 0; i < files.length; i++){
+                $('#pre').append('<div class="col-2 f i'+i+'" id="ss"><button style="background: none; border: none" class="e" onclick="removeFile('+i+')"><b>X</b></button>'+files[i]+'</div>');
+            }
+        });
+
+        function removeFile(i){
+            fichier.pop(i);
+            $('#pre').children('.i' + i).remove();
+        }
+        $(document).ready(function () {
+
+            $('span.countMsg').text($('[name="countMsg"]').val())
+            const _textInput = document.getElementById('ws-content-to-send');
+            const _textSender = document.getElementById('ws-send-content');
+            const enterKeyCode = 13;
+
+            const sendTextInputContent = function () {
+                // Get text input content
+                let content = _textInput.value;
+                let contenu = document.getElementById('ws-content-to-send').value;
+                let fd = new FormData();
+                for(let i = 0; i < fichier.length; i++){
+                    $("#conFiles").append('<input type="file" name="f'+i+'" style="display: none" id="f'+i+'" class="f'+i+'">');
+                    fd.append('f'+i, fichier[i])
+                }
+                fd.append('contenu', contenu);
+                fd.append('comm', {{ communaute.id }});
+                $("#ws-send-content").attr("disabled", "disabled");
+                if(contenu !== "" || $('#file').val() !== ""){
+                    $.ajax({
+                        url : "{{ path('addMessage') }}",
+                        type : "POST",
+                        data: fd,
+                        contentType: false,
+                        processData: false,
+                        success: function(data, status){
+                            if(status === 'success') {
+                                $("#ws-send-content").removeAttr("disabled");
+                                document.getElementById('ws-content-to-send').value = '';
+                                const src = document.querySelector('.sender-img').getAttribute('src')
+                                let date = moment(data.created_at).format('D-MMM-Y h:mm')
+                                let me
+                                if(contenu === '') {
+                                    if(fichier.length > 0) {
+                                        let files = ''
+                                        for (let i = 0; i < data.nameFiles.length; i++) {
+                                            files += `<a href="/files/${data.nameFiles[i]}"><div class="f"> ${data.nameFiles[i]} </div></a>`
+                                        }
+                                        me = `
+                                            <div class="d-flex justify-content-end message">
+                                                <div class="msg_cotainer_send" style="float: right;">
+                                                    <span class="msg_user">{{ app.user.username }}</span>
+                                                    <div class="file">
+                                                        ${files}
+                                                    </div>
+                                                    <span class="msg_time_send text-muted float-right">${date}</span>
+                                                </div>
+                                                <div class="img_cont_msg">
+                                                    <img src="${src}" class="rounded-circle sender-img user_img_msg">
+                                                </div>
+                                            </div>`
+                                    }
+                                } else {
+                                    if(fichier.length > 0){
+                                        let files = ''
+                                        for (let i = 0; i < data.nameFiles.length; i++) {
+                                            files += `<a href="/files/${data.nameFiles[i]}"><div class="f"> ${data.nameFiles[i]} </div></a>`
+                                        }
+                                        me = `<div class="d-flex justify-content-end message">
+                                            <div class="msg_cotainer_send" style="float: right;">
+                                                <span class="msg_user">{{ app.user.username }}</span>
+                                                <div class="file">
+                                                    ${files}
+                                                </div>
+                                                <div class="message-text-send mt-2">${contenu}</div>
+                                                <span class="msg_time_send text-muted float-right">${date}</span>
+                                            </div>
+                                            <div class="img_cont_msg">
+                                                <img src="${src}" class="rounded-circle sender-img user_img_msg">
+                                            </div>
+                                        </div>`
+                                    } else {
+                                        me = `
+                                            <div class="d-flex justify-content-end message">
+                                                <div class="msg_cotainer_send" style="float: right;">
+                                                    <span class="msg_user">{{ app.user.username }}</span>
+                                                    <div class="message-text-send mt-2">${contenu}</div>
+                                                    <span class="msg_time_send text-muted float-right">${date}</span>
+                                                </div>
+                                                <div class="img_cont_msg">
+                                                    <img src="${src}" class="rounded-circle sender-img user_img_msg">
+                                                </div>
+                                            </div>`
+                                    }
+                                }
+                                $(document.querySelector('.msg_card_body')).append(me).animate({ scrollTop: document.querySelector('.msg_card_body').scrollHeight }, 100);
+                                $('#pre').html('');
+                                for(let i = 0; i <= fichier.length + 1; i++){
+                                    fichier.pop(i);
+                                }
+                            }
+                        }
+                    })
+                }
+
+            };
+
+            _textSender.onclick = sendTextInputContent;
+            _textInput.onkeypress = function(e) {
+                // Check for Enter key
+                if (e.keyCode === enterKeyCode) {
+                    e.preventDefault()
+                    sendTextInputContent();
+                }
+            };
+        })
+        function getRandomColor($element) {
+            const letters = '0123456789ABCDEF'.split('');
+            let color = '#';
+            for (let i = 0; i < 6; i++ ) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            $element.css('background-color',color);
+        }
+        const elem = document.querySelector('.msg_card_body')
+        setInterval(function () {
+            $('#ws-content-receiver').load("{{ path('_messages',{id: communaute.id}) }}")
+            $('span.countMsg').text($('[name="countMsg"]').val())
+            const height = elem.scrollHeight - elem.offsetHeight
+            if (elem.scrollTop > height - 200) {
+                $(elem).animate({ scrollTop: elem.scrollHeight }, 100);
+            }
+        }, 5000)
+        {#function recuper(){
+            let xhr = new XMLHttpRequest();
+            let _receiver = document.getElementById('ws-content-receiver');
+            xhr.open('GET', '/user/recuper/message')
+            xhr.onreadystatechange = function (){
+                if(this.readyState === 4 && this.status === 200)
+                {
+                    const rep = JSON.parse(xhr.response)
+                    for(let i=0; i < rep.length; i++) {
+                        let user = rep[i].user;
+                        let contenu = rep[i].contenu
+                        let photo = rep[i].photo
+                        let src = "{{ asset('assets/image/user.png') }}"
+                        if (photo != null) {
+                            src = "{{ asset('photo_de_profil/') }}".concat(photo)
+                        }
+                        const canvas = $('canvas')[0];
+                        const ctx = canvas.getContext('2d');
+                        let img;
+
+                        load(src)
+
+                        function load(src) {
+                            if (!!src.match(/assets\/image\/user\.png/i)) {
+                                return false
+                            }
+                            img = new Image();
+                            img.onload = function() {
+                                run();
+                            };
+                            img.src = src;
+                        }
+
+                        function run() {
+                            if (!img) return;
+                            const options = {
+                                width: 50,
+                                height: 50,
+                                minScale: 1,
+                                ruleOfThirds: true,
+                                debug: true
+                            };
+                            const analyzeOptions = analyze.bind(this, options);
+                            analyzeOptions();
+                        }
+
+                        function analyze(options) {
+                            smartcrop.crop(img, options, draw);
+                        }
+
+                        function draw(result) {
+                            const selectedCrop = result.topCrop;
+                            drawCrop(selectedCrop);
+                        }
+
+                        function drawCrop(crop) {
+                            canvas.width = 50;
+                            canvas.height = 50;
+                            ctx.drawImage(
+                                img,
+                                crop.x,
+                                crop.y,
+                                crop.width,
+                                crop.height,
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            );
+                            src = canvas.toDataURL(img.type)
+                        }
+                        const other = `
+                            <div class="d-flex justify-content-start message">
+                                <div class="img_cont_msg position-relative">
+                                    <img src="${src}" class="rounded-circle user_img_msg">
+                                    <span class="online_icon"></span>
+                                </div>
+                                <div class="msg_cotainer">
+                                    <span class="msg_user">${user}</span>
+                                    ${contenu}
+                                    <span class="msg_time"></span>
+                                </div>
+                            </div>`
+                        const me = `
+                        <div class="d-flex justify-content-end message">
+                            <div class="msg_cotainer_send">
+                                <span class="msg_user">${user}</span>
+                                ${contenu}
+                                <span class="msg_time_send text-muted"></span>
+                            </div>
+                            <div class="img_cont_msg">
+                                <img src="${src}" class="rounded-circle sender-img user_img_msg">
+                            </div>
+                        </div>`
+                        _receiver.innerHTML += (rep[i].user === userName) ? me : other;
+                    }
+                }
+                document.querySelector('.msg_card_body').scrollTop = document.querySelector('.msg_card_body').scrollHeight
+            }
+            xhr.send();
+        }
+        recuper()#}
+        document.querySelector('.msg_card_body').scrollTop = document.querySelector('.msg_card_body').scrollHeight
+    </script>
+{% endblock %}

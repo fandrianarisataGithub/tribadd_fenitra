@@ -1,0 +1,36 @@
+<div class="card snip1218{{ '' == user.description ? ' snip1219' : '' }}" style="width: 18rem;">
+    <div class="image">
+        <div class="water loader-md"></div>
+        <img src="{{ user.photo is not null ? asset('photo_de_profil/' ~ user.photo) : asset('assets/image/user.png') }}" alt="pdp4" class="d-none"/>
+        <p>
+            {{ user.description }}
+        </p>
+    </div>
+    <div class="card-body position-relative d-flex justify-content-center align-items-center flex-column">
+        <small>A rejoint la tribu le {{ role.dateDebut|date('d-m-y') }}</small>
+        <h3>{{ user.username }}<span> {{ user.prenom ~ user.nom }}</span></h3>
+        <h5>{{ role.libelle }}</h5>
+        <div class="icons">
+            <a href="#" title="changer le droit" onclick="openChange(event)">
+                <i class="fa fa-pen"></i>
+            </a>
+            <a href="#" title="bloquer">
+                <i class="fa fa-lock"></i>
+            </a>
+        </div>
+        <div class="change-droit position-absolute p-3">
+            <a href="#" title="fermer" class="btn btn-sm btn-danger position-absolute close-change" onclick="openChange(event)" style="right: -15px; top: -15px;"></a>
+            <form action="{{ path('change_role', {id: communaute.id, 'user': user.id}) }}" method="POST" class="h-100 position-relative text-left">
+                {% for r in roles %}
+                    <div class="form-check">
+                        <input type="radio" name="role" value="{{ r.libelle }}" class="form-check-input" id="{{ 'role' ~ r.libelle }}"{{ role.id == r.id ? 'checked' : '' }}>
+                        <label class="form-check-label" for="{{ 'role' ~ r.libelle }}">{{ r.libelle|capitalize }}</label>
+                    </div>
+                {% endfor %}
+                <div class="form-group">
+                    <input type="submit" value="valider" class="btn btn-yellow">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

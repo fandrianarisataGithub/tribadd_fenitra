@@ -1,0 +1,412 @@
+{% extends 'layout2.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"
+          integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
+          crossorigin="anonymous"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" rel="stylesheet">
+    <style>
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            border: 1px solid #5555;
+            padding-top: 10px;
+            margin: 3px 15px;
+        }
+        .order {
+            line-height: 2;
+        }
+        ul.ks-cboxtags {
+            list-style: none;
+            padding: 10px 0;
+        }
+        ul.ks-cboxtags li{
+            display: inline;
+        }
+        ul.ks-cboxtags li label {
+            padding: 5px 10px;
+            cursor: pointer;
+            display: inline-block;
+            background-color: rgba(255, 255, 255, .9);
+            border: 2px solid rgba(139, 139, 139, .3);
+            color: rgba(0, 0, 0, .6);
+            border-radius: 25px;
+            white-space: nowrap;
+            margin: 3px 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: all .2s;
+        }
+        ul.ks-cboxtags li label::before {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 12px;
+            padding: 2px 6px 2px 2px;
+            content: "\f067";
+            transition: transform .3s ease-in-out;
+
+        }
+        ul.ks-cboxtags li input[type="checkbox"]:checked + label::before {
+            content: "\f00c";
+            transform: rotate(-360deg);
+            transition: transform .3s ease-in-out;
+        }
+
+        ul.ks-cboxtags li input[type="checkbox"]:checked + label {
+            border: 2px solid rgba(13, 105, 180, .8);
+            background-color: rgba(13, 105, 180, .7);
+            color: #fff;
+            transition: all .2s;
+        }
+        ul.ks-cboxtags li input[type="checkbox"] {
+            position: absolute;
+        }
+        ul.ks-cboxtags li input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+        }
+        ul.ks-cboxtags li input[type="checkbox"]:focus + label {
+            border: 2px solid inherit;
+        }
+        a:active,a:focus{
+            border:0 !important;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block title %}{{ communaute.titre }}{% endblock %}
+{% block metaTitle %}{{ communaute.titre }}{% endblock %}
+{% block meta %}{{ communaute.descCourt }}{% endblock %}
+
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc5">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}"
+                             alt="pdp5" class="d-none">
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'showArticleCommunity': ' disabled'} %}
+            <hr class="separator">
+            <div class="community-body">
+                {% if app.user and app.user == communaute.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.creation == 1 %}
+                    <a class="btn btn-yellow mb-4 w-fit-content" href="{{ path('newArticle', {urlPublic: communaute.urlPublic}) }}">Publier
+                        un article</a>
+                {% endif %}
+                {% if app.user and app.user == communaute.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                    <a class="btn btn-outline-secondary mb-4 w-fit-content" title="paramètres des catégories"
+                       href="{{ path('gestionCategorie', {urlPublic: communaute.urlPublic}) }}"><i class="fas fa-cog"></i></a>
+                {% endif %}
+                <div class="row">
+                    <div class="carousel-item active">
+                        <div class="filters{{ communaute.articles|length == 0 ? ' disabled' : '' }}">
+                            {#<div class="col-12 d-flex">
+                                                            <div class="form-group w-25 ml-auto">
+                                                                                                <input id="searchFilter" class="form-control" type="text" placeholder="Rechercher..">
+                                                                                                                                </div>
+                                                                                                                                                            </div>#}
+                            <div class="col-9"><h2>Filtres par catégorie</h2>
+                                <ul class="checkbox-group ks-cboxtags">
+                                    {% for c in communaute.categories %}
+                                        <li class="checkbox">
+                                            <input class="switch" id="checkbox-{{ c.id }}"  type="checkbox" value=".category-{{ c.id }}"{{ communaute.articles|length == 0 ? ' disabled' : '' }}/>
+                                            <label for="checkbox-{{ c.id }}" class="checkbox-label">{{ c.nom|capitalize }}</label>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="col-3"><h4>Classer par</h4>
+                                <div class="order">
+                                    <button type="button" class="sort-toggle btn btn-sm btn-dark mt-1">Titre <i class="fas fa-caret-down"></i></button>
+                                    <button type="button" class="sort-date-toggle btn btn-sm btn-dark mt-1">Date <i class="fas fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row articles-list">
+                            {% for a in communaute.articles|reverse %}
+                                <div class="article mix category-{{ a.categories.id }} col-sm-6 col-md-4" data-alphabetic="{{ a.titre|capitalize }}"
+                                     data-date="{{ a.createdAt|date }}"
+                                     data-id="{{ a.id }}">
+                                    <div class="item-box-blog">
+                                        <div class="item-box-blog-image d-flex">
+                                            <!--Date-->
+                                            <div class="item-box-blog-date bg-blue-ui text-white">
+                                                <span class="mon">{{ a.createdAt|date('d-m-y h:i') }}</span>
+                                            </div>
+                                            <!--Image-->
+                                            <figure class="mx-auto my-auto">
+                                                {% if a.image is not null %}
+                                                    <a href="{{ app.user ? path('userShowArticle', {urlPublic: communaute.urlPublic, id: a.id}) : path('showArticle', {urlPublic: communaute.urlPublic, id: a.id}) }}">   <img alt="image article" src="{{ asset('articles/') }}{{ a.image }}"></a>
+                                                {% else %}
+                                                    <a href="{{ app.user ? path('userShowArticle', {urlPublic: communaute.urlPublic, id: a.id}) : path('showArticle', {urlPublic: communaute.urlPublic, id: a.id}) }}"><img alt="image par defaut" src="{{ asset('assets/image/empty-image.jpg') }}"></a>
+                                                {% endif %}
+                                            </figure>
+                                        </div>
+                                        <div class="item-box-blog-body">
+                                            <!--Heading-->
+                                            <div class="item-box-blog-heading nav-item">
+                                                <h5>  <a href="{{ app.user ? path('userShowArticle', {urlPublic: communaute.urlPublic, id: a.id}) : path('showArticle', {urlPublic: communaute.urlPublic, id: a.id}) }}" style="text-decoration: none;color: rgb(14 14 14 / 70%)!important;"> {{ a.titre }}</a>
+                                                </h5>
+                                            </div>
+                                            <!--Data-->
+                                            <div class="item-box-blog-data p-3">
+                                                <p><i class="fas fa-user"></i> {{ a.user.username }}, <i class="fas fa-comments"></i>Commentaires({{ a.commentaires|length }})</p>
+                                            </div>
+                                            <!--Text-->
+                                            <div class="item-box-blog-text">
+                                                <p>{{ a.introduction }}</p>
+                                            </div>
+                                            <div class="mt d-flex w-100">
+                                                <div class="mx-auto">
+                                                    <a href="{{ app.user ? path('userShowArticle', {urlPublic: communaute.urlPublic, id: a.id}) : path('showArticle', {urlPublic: communaute.urlPublic, id: a.id}) }}"
+                                                       tabindex="0" class="btn bg-blue-ui text-white read">voir plus</a>
+                                                    {% if app.user and communaute.user == app.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.modification == 1 %}
+                                                        {% if a.user == app.user or app.user == communaute.user or membre.role.libelle == 'administrateur' %}
+                                                            <a href="{{ path('editArticle', {urlPublic: communaute.urlPublic, id: a.id}) }}" tabindex="0" class="btn ml-1 align-self-start bg-yellow-ui text-white read"><i class="fa fa-pen"></i></a>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    {% if app.user and communaute.user == app.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.suppression == 1 %}
+                                                        <a onclick="removeArticle(event, {{ a.id }}, '{{ csrf_token('remove'~a.id) }}')" href="#" tabindex="0" class="btn ml-1 align-self-start bg-danger-ui text-white read"><i class="fa fa-trash-alt"></i></a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <!--Read More Button-->
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="col-md-12">
+                                    <h2>Il n'y a pas d'article</h2>
+                                </div>
+                            {% endfor %}
+                            <div id="noItemsFound" class="col-md-12" style="display: none">
+                                <h2>Aucun résultat</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"
+            integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mixitup/3.3.1/mixitup.min.js" integrity="sha512-nKZDK+ztK6Ug+2B6DZx+QtgeyAmo9YThZob8O3xgjqhw2IVQdAITFasl/jqbyDwclMkLXFOZRiytnUrXk/PM6A==" crossorigin="anonymous"></script>
+    <script>
+        const profilePublishers = document.querySelectorAll('.item-box-blog-image')
+        for (let i = 0; i < profilePublishers.length; i++) {
+            cropImage(profilePublishers[i], profilePublishers[i].querySelector('img'))
+
+        }        }
+        /*$('.order').on('click', '.sort', function (e) {
+                    const sorts = document.querySelectorAll('.sort')
+                                for (let i = 0; i < sorts.length; i++) {
+                                                sorts[i].classList.remove('active')
+                                                            }
+                                                                        e.target.classList.add('active')
+                                                                                })*/
+        const sortToggle = document.querySelector('.sort-toggle');
+        let sortOrder = 'alphabetic:desc';
+        const sortDateToggle = document.querySelector('.sort-date-toggle');
+        let sortDateOrder = 'date:desc';
+        const containerEl = document.querySelector('.articles-list')
+        const checkboxGroup = document.querySelector('.checkbox-group');
+        let checkboxes = checkboxGroup.querySelectorAll('input[type="checkbox"]');
+        const noItemsFoundMessage = document.querySelector('#noItemsFound')
+        let mixer = mixitup(containerEl, {
+            callbacks: {
+                onMixEnd: function (state) {
+                    // ## 3 - hasFailed true? show alert
+                    // if (state.hasFailed) {
+                    // noItemsFoundMessage.style.display = "block";
+                    // } else {
+                    // noItemsFoundMessage.style.display = "none";
+                    // }
+                    // },
+                    // }
+
+                }
+            });
+        sortDateToggle.addEventListener('click', function() {
+            const i = this.querySelector('i')
+            switch(sortDateOrder) {
+                case 'date:asc':
+                    sortDateOrder = 'date:desc';
+                    i.classList.remove('fa-caret-up')
+                    i.classList.add('fa-caret-down')
+                    break;
+                    case 'date:desc':
+                        sortDateOrder = 'date:asc';
+                        i.classList.remove('fa-caret-down')
+                        i.classList.add('fa-caret-up')
+                        break;
+            }
+            mixer.sort(sortDateOrder);
+        });
+        sortToggle.addEventListener('click', function() {
+            const i = this.querySelector('i')
+            switch(sortOrder) {
+                case 'alphabetic:asc':
+                    sortOrder = 'alphabetic:desc';
+                    i.classList.remove('fa-caret-up')
+                    i.classList.add('fa-caret-down')
+                    break;
+                    case 'alphabetic:desc':
+                        sortOrder = 'alphabetic:asc';
+                        i.classList.remove('fa-caret-down')
+                        i.classList.add('fa-caret-up')
+                        break;
+            }
+            mixer.sort(sortOrder);
+        });
+        checkboxGroup.addEventListener('change', function() {
+            let selectors = [];
+            for (let i = 0; i < checkboxes.length; i++) {
+                let checkbox = checkboxes[i];
+                if (checkbox.checked) selectors.push(checkbox.value);
+            }
+            const selectorString = selectors.length > 0 ?
+                selectors.join(',') :
+                'all';
+            mixer.filter(selectorString);
+        });
+        const fetchAction = async function (url, data = {}) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    "content-type": "application/json"
+                },
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                return response.json()
+            } else {
+                let error = await response.json()
+                throw new Error(error.message)
+            }
+        }
+        /*$("#searchFilter").on("keyup", function() {
+                    var value = $(this).val().toLowerCase();
+                                $(".article").filter(function() {
+                                                $(this).toggle($(this).find('.item-box-blog-heading h5').text().toLowerCase().indexOf(value) > -1)
+                                                            });
+                                                                    });*/
+        const removeArticle = async function (e, id, token) {
+            e.preventDefault()
+            if (!confirm('Voulez-vous vraiment supprimer cet article ?')) return
+            const response = await fetchAction("/in/remove/article-".concat(id), {'_token': token})
+            if (response.result === 'success') {
+                $('.article[data-id="' + id + '"]').fadeOut("slow", function () {
+                    this.remove()
+
+                    if (document.querySelectorAll('.article').length < 1) {
+
+                        $('.articles-list').html(`
+
+                                    <div class="col-md-12">
+
+                                        <h2>Il n'y a pas d'article</h2>
+
+                                    </div>`)
+
+                    }
+
+                })
+
+            } else {
+
+                const opts = {
+
+                    "closeButton": true,
+
+                    "debug": false,
+
+                    "newestOnTop": false,
+
+                    "progressBar": true,
+
+                    "positionClass": "toast-top-right",
+
+                    "preventDuplicates": true,
+
+                    "onclick": null,
+
+                    "showDuration": "300",
+
+                    "hideDuration": "1000",
+
+                    "timeOut": "10000",
+
+                    "extendedTimeOut": "1000",
+
+                    "showEasing": "swing",
+
+                    "hideEasing": "linear",
+
+                    "showMethod": "fadeIn",
+
+                    "hideMethod": "fadeOut"
+
+                };
+
+                toastr.error("Echec de la suppression de l'article", '', opts);
+
+            }
+
+        }
+
+    </script>
+
+{% endblock %}
+
+
+

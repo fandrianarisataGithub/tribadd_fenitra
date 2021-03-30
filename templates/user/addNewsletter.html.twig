@@ -1,0 +1,173 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"
+          integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
+          crossorigin="anonymous"/>
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" rel="stylesheet">
+    <style>
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            border: 1px solid #5555;
+            padding-top: 10px;
+            margin: 3px 15px;
+        }
+        .order {
+            line-height: 2;
+        }
+        ul.ks-cboxtags {
+            list-style: none;
+            padding: 10px 0;
+        }
+        ul.ks-cboxtags li{
+            display: inline;
+        }
+        ul.ks-cboxtags li label {
+            padding: 5px 10px;
+            cursor: pointer;
+            display: inline-block;
+            background-color: rgba(255, 255, 255, .9);
+            border: 2px solid rgba(139, 139, 139, .3);
+            color: rgba(0, 0, 0, .6);
+            border-radius: 25px;
+            white-space: nowrap;
+            margin: 3px 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: all .2s;
+        }
+        ul.ks-cboxtags li label::before {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 12px;
+            padding: 2px 6px 2px 2px;
+            content: "\f067";
+            transition: transform .3s ease-in-out;
+
+        }
+        ul.ks-cboxtags li input[type="checkbox"]:checked + label::before {
+            content: "\f00c";
+            transform: rotate(-360deg);
+            transition: transform .3s ease-in-out;
+        }
+
+        ul.ks-cboxtags li input[type="checkbox"]:checked + label {
+            border: 2px solid rgba(13, 105, 180, .8);
+            background-color: rgba(13, 105, 180, .7);
+            color: #fff;
+            transition: all .2s;
+        }
+        ul.ks-cboxtags li input[type="checkbox"] {
+            position: absolute;
+        }
+        ul.ks-cboxtags li input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+        }
+        ul.ks-cboxtags li input[type="checkbox"]:focus + label {
+            border: 2px solid inherit;
+        }
+        a:active,a:focus{
+            border:0 !important;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block title %}Newsletter, informations des publications{% endblock %}
+{% block metaTitle %}Newsletter, informations des publications{% endblock %}
+{% block meta %}Grâce à la newsletter de tribADD , vous ne raterez plus les essentiels et recevrez régulièrement les dernières nouvelles et informations sur votre communauté.{% endblock %}
+
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none"
+                         src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}"
+                         alt="pdc5">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}"
+                             alt="pdp5" class="d-none">
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'showArticleCommunity': ' disabled'} %}
+            <hr class="separator">
+            <div class="community-body">
+                <div class="col-md-12">
+                    <h3 class="text-uppercase mb-3">Nouvelle newsletter</h3>
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                    <div class="form-group">
+                        {{ form_widget(form.object) }}
+                        {{ form_errors(form.object) }}
+                        <div id="k51"></div>
+                    </div>
+                    <div class="form-group">
+                        {{ form_widget(form.contenu) }}
+                        {{ form_errors(form.contenu) }}
+                        <div id="k160"></div>
+                    </div>
+                    <input name="enreg" type="submit" id="publier" class="btn btn-sm btn-yellow" value="Enregistrer">
+                    <input name="addpost" style="border-radius: 7px; color: black;text-transform: uppercase " type="submit" id="publier" class="btn btn-info" value="ajouter des posts">
+                    <input name="send" style="border-radius: 7px; color: black; text-transform: uppercase" type="submit" id="publier" class="btn btn-secondary" value="envoyer directment">
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#news_letter_contenu').summernote({
+                tabsize: 2,
+                minHeight: 200,
+                placeholder: 'Contenu'
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,830 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" />
+{% endblock %}
+{% block title %}Newsletter, informations des publications{% endblock %}
+{% block metaTitle %}Newsletter, informations des publications{% endblock %}
+{% block meta %}Grâce à la newsletter de tribADD , vous ne raterez plus les essentiels et recevrez régulièrement les dernières nouvelles et informations sur votre communauté.{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp  communaute" class="d-none">
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                        {% endif %}
+                    {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'showCommunity': ' disabled'} %}
+            <hr class="separator">
+            <div class="community-body">
+                <h2>{{ n.object }}</h2>
+                <p>
+                    {{ n.contenu|raw }}
+                </p>
+                <hr class="separator">
+                <div class="posts-list">
+                    <h2>Les posts sélectionnés :</h2><br>
+                    {% for p in post|reverse %}
+                        <div class="post" data-id="{{ p.id }}">
+                            <div class="profile-publisher-container">
+                                <img src="{{ p.user.photo is null ?  asset('assets/image/user.png') : asset('photo_de_profil/' ~ p.user.photo) }}" alt="photo de communaute" class="profile-publisher d-none">
+                            </div>
+                            <div class="post-body">
+                                <div class="d-flex">
+                                    <div>
+                                        <h5>{{ p.titre }}</h5>
+                                        <time>{{ p.publishedAt|date('d/m/Y à H:i') }}</time>
+                                    </div>
+                                    {% if app.user %}
+                                        {% if app.user == communaute.user or membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.modification == 1 %}
+                                            {% if p.type == 'P' and p.user == app.user or p.type == 'P' and app.user == communaute.user or p.type == 'P' and membre.role.libelle == 'administrateur' %}
+                                                <a class="ml-auto text-decoration-none" href="{{ path('editPost', {urlPublic: communaute.urlPublic, id:p.id}) }}"><i class="fa fa-pen"></i> Modifier</a>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex mt-3 pl-0 col-md-12">
+                                    {% if p.imageEncadre is not null %}
+                                        <div class="image-encadre col-md-3 d-flex justify-content-center align-items-center">
+                                            <div class="water loader-md"></div>
+                                            {% if p.type == 'P' or p.type is null %}
+                                                <img class="d-none" src="{{ asset('imgEncadre/' ~ p.imageEncadre) }}" alt="photo de cadre">
+                                            {% elseif p.type == 'A' %}
+                                                <img class="d-none" src="{{ asset('articles/' ~ p.imageEncadre) }}" alt="photo article">
+                                            {% elseif p.type == 'C' %}
+                                                <img class="d-none" src="{{ asset('profil/' ~ p.imageEncadre) }}" alt="pdp2">
+                                            {% elseif p.type == 'MC' %}
+                                                <img class="d-none" src="{{ asset('profil/' ~ p.imageEncadre) }}" alt="pdc2">
+                                            {% elseif p.type == 'V' %}
+                                                <img class="d-none" src="{{ asset('miniature/'~ p.imageEncadre) }}" alt="miniature">
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="post-text col-md-{{ p.imageEncadre is null ? '12' : '9' }}">
+                                        <p class="short-desc overflow">{{ p.shortDescription }}</p>
+                                        {% if p.type == 'P' or p.type is null %}
+                                            <a href="#" class="read-more">Voir plus</a>
+                                        {% elseif p.type == 'A' %}
+                                            <a href="{{ app.user ? path('userShowArticle', {urlPublic: communaute.urlPublic, id: p.articleId}) : path('showArticle', {urlPublic:communaute.urlPublic, id: p.articleId}) }}">Lire l'article</a>
+                                        {% elseif p.type == 'C' or p.type == 'MC' %}
+                                            <a class="nav-link" href="{{ app.user ? path('UsershowPresentation', {urlPublic: communaute.urlPublic}) : path('showPresentation', {urlPublic: communaute.urlPublic}) }}">Voir plus</a>
+                                        {% elseif p.type == 'V' %}
+                                            <a class="nav-link" href="{{ app.user ? path('viewVideo', {urlPublic:communaute.urlPublic, id: p.articleId}) : path('voirVideo', {urlPublic: communaute.urlPublic, id: p.articleId}) }}">Voir plus</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="post-contenu"><hr class="separator">{{ p.contenus|raw }}</div>
+                                <a class="show-all-comments-sm mb-2 w-fit-content" href="{{ app.user ? path('showPostCommunaute', {urlPublic: communaute.urlPublic, id: p.id}) : path('showPost', {urlPublic: communaute.urlPublic, id: p.id}) }}">Afficher tous les commentaires</a>
+                                <div class="post-footer">
+                                    {% set like = false %}
+                                    {% set count = 0 %}
+                                    {% for l in p.likes %}
+                                        {% if l.status %}
+                                            {% set count = count + 1 %}
+                                        {% endif %}
+                                        {% if app.user and l.user == app.user and l.status %}
+                                            {% set like = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    <a href="#" onclick="event.preventDefault()" class="count-likes text-decoration-none align-self-end mr-1">{{ count > 0 and count < 10 ? '0' ~ count : count }}</a>
+                                    <div class="action-like">
+                                        {% if app.user and membre is not null and membre.role is not null or app.user and membre is null %}
+                                            {% if like %}
+                                                <a class="text-decoration-none dislike" href="#" data-post="{{ p.id }}">je n'aime plus</a>
+                                            {% else %}
+                                                <a class="text-decoration-none like" href="#" data-post="{{ p.id }}">j'aime</a>
+                                            {% endif %}
+                                        {% else %}
+                                            <a class="text-decoration-none disabled" href="#">j'aime</a>
+                                        {% endif %}
+                                    </div>
+                                    <a class="show-all-comments" href="{{ app.user ? path('showPostCommunaute', {urlPublic: communaute.urlPublic,id: p.id}) : path('showPost', {urlPublic: communaute.urlPublic, id: p.id}) }}">Afficher tous les commentaires</a>
+                                    <div class="post-footer-tools">
+                                        <span>{{ p.commentaires|length }} Commentaire(s)</span>
+                                        <span class="btn-comment arrow-down"></span>
+                                    </div>
+                                </div>
+                                <div class="comment-container">
+                                    {% if app.user and app.user.username == communaute.user.username or app.user and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.commentaire == 1 %}
+                                        <form method="post" onsubmit="submitComment(event)" action="{{ path('ShowmyCommunaute', {urlPublic:communaute.urlPublic}) }}">
+                                            <input name="idPost" type="hidden" value="{{ p.id }}">
+                                            <div class="input-group">
+                                                <textarea name="commentaire" rows="2" placeholder="Commenter" class="form-control"></textarea>
+                                                <div class="input-group-append">
+                                                    <input type="submit" class="btn btn-yellow" value="Commenter">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    {% else %}
+                                        <div class="input-group">
+                                            <textarea name="commentaire" disabled rows="2" placeholder="Commenter" class="form-control"></textarea>
+                                            <div class="input-group-append">
+                                                <button disabled class="btn btn-yellow">commenter</button>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    <div class="comments-list">
+                                        {#{% if p.commentaires|length > 2 %}
+                                            <a href="#" class="d-block mb-2 w-fit-content">...commentaires précédentes</a>
+                                        {% endif %}#}
+                                        {% for c in p.commentaires %}
+                                            <div class="media mb-3" data-id="{{ c.id }}">
+                                                <div class="profil-comment">
+                                                    <img class="mr-3 rounded-circle profile-publisher" src="{{ c.user.photo is not null ? asset('photo_de_profil/' ~ c.user.photo) : asset('assets/image/user.png') }}" alt="photo utilisateur">
+                                                </div>
+                                                <div class="media-body">
+                                                    {% if app.user %}
+                                                        {% if app.user == communaute.user or membre is not null and membre.role is not null and membre.role.droitsUtilisateur.suppression == 1 or app.user == c.user %}
+                                                            <div class="dropdown">
+                                                                <span class="float-right btn btn-icon fa fa-ellipsis-h" data-toggle="dropdown"></span>
+                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                    {% if app.user == c.user %}
+                                                                        <a href="#" onclick="update(event, {{ c.id }})" class="dropdown-item"><i class="fa fa-pen"></i> Modifier</a>
+                                                                    {% endif %}
+                                                                    <a href="#" onclick="remove(event, {{ c.id }}, '{{ csrf_token('delete') }}')" class="dropdown-item"><i class="fa fa-trash-alt"></i> Supprimer</a>
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    <h6 class="mt-0 d-inline-block">{{ c.user.username }}</h6>
+                                                    <time>{{ c.commentedAt|date('H:i d/m/Y') }}</time>
+                                                    <div class="comment-content">{{ c.contenus }}</div>
+                                                    {#<div class="media mt-4">
+                                            <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="photo3">
+                                            <div class="media-body">
+                                                <h5 class="mt-0">Commenter Name</h5>
+                                                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+                                            </div>
+                                        </div>#}
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <span class="nothing">{{ app.user and app.user.username == communaute.user.username or app.user and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.commentaire == 1 ? 'Commentez en premier' : 'Aucun commentaire' }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="separator">
+                    {% else %}
+                        <div class="col-md-12">
+                            <h2>Il n'y a pas de post</h2>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/fr.min.js" integrity="sha512-RAt2+PIRwJiyjWpzvvhKAG2LEdPpQhTgWfbEkFDCo8wC4rFYh5GQzJBVIFDswwaEDEYX16GEE/4fpeDNr7OIZw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(function() {
+            $('#form_titre').on('input', function() {
+                var titre = $(this).val();
+                var cal = titre.length;
+                if (cal > 51) {
+                    $('#k51').html();
+                    $('#k51').html('<p style="color:red;">La taille du titre ne doit pas dépasser les 51 caractères</p>');
+                    e.preventDefault();
+                }else{
+                    $('#k51').html();
+                    var text = "Vous avez saisi "+cal+"/51 caractères";
+                    $('#k51').html('<p>'+text+'</p>');
+                }
+
+
+            });
+            $('#form_shortDescription').on('input', function() {
+                var description = $(this).val();
+                var cal = description.length;
+                if (cal > 160) {
+                    $('#k160').html();
+                    $('#k160').html('<p style="color:red;">La taille de description ne doit pas dépasser les 160 caractères</p>');
+                    e.preventDefault();
+                }else{
+                    $('#k160').html();
+                    var text = "Vous avez saisi "+cal+"/160 caractères";
+                    $('#k160').html('<p>'+text+'</p>');
+                }
+
+
+            });
+            $('#publier').click(function(e){
+                var titre = $('#form_titre').val();
+                var description = $('#form_shortDescription').val();
+
+                if (titre.length >= 51) {
+                    $('#k51').html('<p>La taille du titre ne doit pas dépasser les 51 caractères</p>');
+                    e.preventDefault();
+                }
+                if (description.length >= 160) {
+                    $('#k160').html('<p>La taille de description ne doit pas dépasser les 160 caractères</p>');
+                    e.preventDefault();
+                }
+            });
+        });
+        function fileOpen(e) {
+            e.preventDefault();
+            $('#image_encadre').click()
+        }
+
+        const fetchAction = async function (url, data = {}) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    "content-type": "application/json"
+                },
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                return response.json()
+            } else {
+                let error = await response.json()
+                throw new Error(error.message)
+            }
+        }
+
+        $('.like, .dislike').on('click', async function (e) {
+            e.preventDefault()
+            const post = $(this).attr('data-post')
+            const response = await fetchAction('/in/action/like-'.concat(post))
+            $('.post[data-id="' + post + '"] .post-body .post-footer .count-likes').text((response.count > 0 && response.count < 10 ? '0' + response.count : response.count ))
+            $('.post[data-id="' + post + '"] .post-body .post-footer .action-like a:eq(0)').text(response.text)
+            return false
+        })
+
+        // setInterval(recuperLike,10000)
+        const profilePublishers = document.querySelectorAll('.profile-publisher-container')
+        for (let i = 0; i < profilePublishers.length; i++) {
+            cropImage(profilePublishers[i], profilePublishers[i].querySelector('img'))
+        }
+        const imageEncadre = document.querySelectorAll('.image-encadre')
+        for (let i = 0; i < imageEncadre.length; i++) {
+            cropImage(imageEncadre[i], imageEncadre[i].querySelector('img'))
+        }
+        jQuery(function($) {
+            var re = /((http|https|ftp):\/\/[a-zа-я0-9\w?=&.\/-;#~%-]+(?![a-zа-я0-9\w\s?&.\/;#~%"=-]*>))/g;
+            function makeHTML(textNode) {
+                var source = textNode.data;
+                return source.replace(re, function() {
+                    var url = arguments[0];
+                    var a = $('<a></a>').attr({'onclick' : 'window.open(\'' + url + '\'); return false;','href': '#', 'target': '_blank'}).text(url);
+                    return url.match(/^https?:\/\/$/) ? url : $('<div></div>').append(a).html();
+                });
+            }
+            function eachText(node, callback) {
+                $.each(node.childNodes, function() {
+                    if (this.nodeType != 8 && this.nodeName != 'A') {
+                        this.nodeType != 1 ? callback(this) : eachText(this, callback);
+                    }
+                });
+            }
+            $.fn.autolink = function() {
+                return this.each(function() {
+                    var queue = [];
+                    eachText(this, function(e) {
+                        var html = makeHTML(e);
+                        if (html != e.data) {
+                            queue.push([e, makeHTML(e)]);
+                        }
+                    });
+                    $.each(queue, function(i, x) {
+                        $(x[0]).replaceWith(x[1]);
+                    });
+                });
+            };
+        });
+        {% if app.user %}
+        {% if app.user.username == communaute.user.username or membre is not null and membre.role is not null %}
+        (function () {
+            const canvas = $('canvas')[0];
+            const ctx = canvas.getContext('2d');
+            let img;
+            const origin = document.querySelector('#img_preview')
+            const container = origin.closest('.community-profil')
+
+            $('#published-post').on('submit', function (e) {
+                if (this.querySelector('#image_encadre').files.length === 0) {
+                    e.preventDefault()
+                    this.querySelector('#image_encadre').closest('.form-group').querySelector('span.text-danger').classList.remove('d-none')
+                    $('#image_encadre').on('change', function () {
+                        if (this.files.length > 0) {
+                            this.closest('.form-group').querySelector('span.text-danger').classList.add('d-none')
+                        } else {
+                            this.closest('.form-group').querySelector('span.text-danger').classList.remove('d-none')
+                        }
+                    })
+                }
+            })
+
+            $('#image_encadre').change(function() {
+                handleFiles(this.files);
+            });
+
+            async function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (
+                        typeof FileReader !== 'undefined' &&
+                        file.type.indexOf('image') != -1
+                    ) {
+                        const reader = new FileReader();
+                        // Note: addEventListener doesn't work in Google Chrome for this event
+                        reader.onload = function(evt) {
+                            load(evt.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                } else {
+                    load("{{ asset('assets/image/empty-image-min.jpg') }}")
+                }
+            }
+
+            function load(src) {
+                if (src.match(/assets\/image\/empty-image-min\.jpg/i)) {
+                    origin.setAttribute('src', src)
+                    return false
+                }
+                $(origin).addClass('d-none')
+                $(container).find('div.water').removeClass('d-none')
+                img = new Image();
+                img.onload = function() {
+                    run();
+                };
+                img.src = src;
+            }
+
+            function run() {
+                if (!img) return;
+                const options = {
+                    width: container.offsetWidth,
+                    height: container.offsetHeight,
+                    minScale: 1,
+                    ruleOfThirds: true,
+                    debug: true
+                };
+                const analyzeOptions = analyze.bind(this, options);
+                analyzeOptions();
+            }
+            function analyze(options) {
+                smartcrop.crop(img, options, draw);
+            }
+
+            function draw(result) {
+                const selectedCrop = result.topCrop;
+                drawCrop(selectedCrop);
+            }
+
+            function drawCrop(crop) {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+                ctx.drawImage(
+                    img,
+                    crop.x,
+                    crop.y,
+                    crop.width,
+                    crop.height,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+                $(origin).attr('src', canvas.toDataURL(img.type))
+                $(origin).removeClass('d-none')
+                $(container).find('div.water').addClass('d-none')
+            }
+        })()
+        function showPostForm(e) {
+            e.preventDefault()
+            const container = document.querySelector(".new-post-container")
+            $(container).toggle('slow', function () {
+                if ($(this).css('display') === 'none') {
+                    $('html, body').animate({scrollTop: $(e.target).offset().top}, 50, function() {
+                        $(e.target).focus()
+                    });
+                    $('#published_post').removeClass('d-none')
+                } else {
+                    const canvas = $('canvas')[0];
+                    const ctx = canvas.getContext('2d');
+                    let img;
+                    const origin = container.querySelector('.profile-new-post img')
+                    let src = origin.getAttribute('src');
+                    function isDataURL(s) {
+                        return !!s.match(isDataURL.regex);
+                    }
+                    isDataURL.regex = /^\s*data:([a-z]+\/[a-z]+(;[a-z\-]+\=[a-z\-]+)?)?(;base64)?,[a-z0-9\!\$\&\'\,\(\)\*\+\,\;\=\-\.\_\~\:\@\/\?\%\s]*\s*$/i;
+
+                    if (isDataURL(src || !!src.match(/assets\/image\/user\.png/i))) {
+                        return false
+                    }
+
+                    function load(src) {
+                        $(origin).addClass('d-none')
+                        img = new Image();
+                        img.onload = function() {
+                            run();
+                        };
+                        img.src = src;
+                    }
+
+                    function run() {
+                        if (!img) return;
+                        const options = {
+                            width: container.querySelector('.profile-new-post').offsetWidth,
+                            height: container.querySelector('.profile-new-post').offsetHeight,
+                            minScale: 1,
+                            ruleOfThirds: true,
+                            debug: true
+                        };
+                        const analyzeOptions = analyze.bind(this, options);
+                        analyzeOptions();
+                    }
+
+                    function analyze(options) {
+                        smartcrop.crop(img, options, draw);
+                    }
+
+                    function draw(result) {
+                        const selectedCrop = result.topCrop;
+                        drawCrop(selectedCrop);
+                    }
+
+                    function drawCrop(crop) {
+                        canvas.width = container.querySelector('.profile-new-post').offsetWidth;
+                        canvas.height = container.querySelector('.profile-new-post').offsetHeight;
+                        ctx.drawImage(
+                            img,
+                            crop.x,
+                            crop.y,
+                            crop.width,
+                            crop.height,
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        );
+                        src = canvas.toDataURL(img.type)
+                    }
+                    load(src)
+                    setTimeout(function () {
+                        $(origin).attr('src', src)
+                        $(origin).removeClass('d-none')
+                        $('html,body').animate({scrollTop: $(container).offset().top}, 50, function() {
+                            $(container).focus()
+                        });
+                        $('#published_post').addClass('d-none')
+                    }, 100)
+                }
+            })
+        }
+        {% endif %}
+        {% endif %}
+        function submitComment(e) {
+            e.preventDefault()
+            const data = new FormData(e.target)
+            $(e.target).find('textarea[name="commentaire"]').val('').focus()
+            if (data.get('commentaire') == '' || data.get('idPost') == null) {
+                return
+            }
+            $.ajax({
+                url: $(e.target).prop('action'),
+                type: "POST",
+                dataType: "json",
+                processData: false,
+                contentType: false,
+                data: data,
+                success: function (response) {
+                    if (response.resp === 'success') {
+                        let src = "{{ asset('assets/image/user.png') }}"
+                        if (response.data.user.photo != null) {
+                            src = "{{ asset('photo_de_profil/') }}".concat(response.data.user.photo)
+                        }
+                        // const id = response.data.id
+                        const id = 37
+                        const post = $('.post[data-id="'.concat(response.data.posts, '"]'))
+                        post.find('.post-footer-tools span:eq(0)').text(response.data.count + ' Commentaire(s)')
+                        const dateformat = moment(response.data.commentedAt.date).format('HH:mm DD/MM/Y');
+                        const canvas = $('canvas')[0];
+                        const ctx = canvas.getContext('2d');
+                        let img;
+
+                        load(src)
+
+                        function load(src) {
+                            if (!!src.match(/assets\/image\/user\.png/i)) {
+                                return false
+                            }
+                            img = new Image();
+                            img.onload = function() {
+                                run();
+                            };
+                            img.src = src;
+                        }
+
+                        function run() {
+                            if (!img) return;
+                            const options = {
+                                width: 50,
+                                height: 50,
+                                minScale: 1,
+                                ruleOfThirds: true,
+                                debug: true
+                            };
+                            const analyzeOptions = analyze.bind(this, options);
+                            analyzeOptions();
+                        }
+
+                        function analyze(options) {
+                            smartcrop.crop(img, options, draw);
+                        }
+
+                        function draw(result) {
+                            const selectedCrop = result.topCrop;
+                            drawCrop(selectedCrop);
+                        }
+
+                        function drawCrop(crop) {
+                            canvas.width = 50;
+                            canvas.height = 50;
+                            ctx.drawImage(
+                                img,
+                                crop.x,
+                                crop.y,
+                                crop.width,
+                                crop.height,
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            );
+                            src = canvas.toDataURL(img.type)
+                        }
+                        let dropdown = ''
+                        {% if app.user %}
+                        let link = ''
+                        {% if app.user == communaute.user and membre is null %}
+                        if (response.data.user.username === "{{ app.user.username }}") {
+                            link = `<a href="#" onclick="update(event, ${id})" class="dropdown-item"><i class="fa fa-pen"></i> Modifier</a>`
+                        }
+                        dropdown += `<div class="dropdown">
+                                                <span class="float-right btn btn-icon fa fa-ellipsis-h" data-toggle="dropdown"></span>
+                                                <div class="dropdown-menu">
+                                                    ${link}
+                                                    <a href="#" onclick="remove(event, ${id}, '{{ csrf_token('delete') }}')" class="dropdown-item"><i class="fa fa-trash-alt"></i> Supprimer</a>
+                                                </div>
+                                        </div>`
+                        {% elseif membre is not null %}
+                        {% if membre.role is not null and membre.role.droitsUtilisateur.suppression == 1 %}
+                        if (response.data.user.username === "{{ app.user.username }}") {
+                            link = '<a href="#" onclick="update(event, ${id})" class="dropdown-item"><i class="fa fa-pen"></i> Modifier</a>'
+                        }
+                        dropdown += `<div class="dropdown">
+                                                        <span class="float-right btn btn-icon fa fa-ellipsis-h" data-toggle="dropdown"></span>
+                                                        <div class="dropdown-menu">
+                                                        ${link}
+                                                            <a href="#" onclick="remove(event, ${id}, '{{ csrf_token('delete') }}')" class="dropdown-item"><i class="fa fa-trash-alt"></i> Supprimer</a>
+                                                        </div>
+                                                </div>`
+                        {% else %}
+                        if (response.data.user.username === "{{ app.user.username }}") {
+                            dropdown += `<div class="dropdown">
+                                                <span class="float-right btn btn-icon fa fa-ellipsis-h" data-toggle="dropdown"></span>
+                                                <div class="dropdown-menu">
+                                                <a href="#" onclick="update(event, ${id})" class="dropdown-item"><i class="fa fa-pen"></i> Modifier</a>
+                                                    <a href="#" onclick="remove(event, ${id}, '{{ csrf_token('delete') }}')" class="dropdown-item"><i class="fa fa-trash-alt"></i> Supprimer</a>
+                                                </div>
+                                        </div>`
+                        }
+                        {% endif %}
+                        {% else %}
+                        dropdown = ''
+                        {% endif %}
+                        {% endif %}
+                        setTimeout(function () {
+                            const newComment = `
+                                    <div class="media mb-3" data-id="${id}">
+                                        <div class="profil-comment">
+                                            <img class="mr-3 rounded-circle profile-publisher" src="${src}" alt="photo de publication">
+                                        </div>
+                                        <div class="media-body">
+                                            ${dropdown}
+                                            <h6 class="mt-0 d-inline-block">${response.data.user.username}</h6>
+                                            <time>${dateformat}</time>
+                                            <div class="comment-content">${response.data.contenus}</div>
+                                        </div>
+                                    </div>
+                                `
+                            post.find('.comment-container .comments-list').append(newComment)
+                            post.find('.comment-container .comments-list span.nothing').remove()
+                            $('.comment-content').autolink()
+                        }, 100)
+                    } else {
+                        console.log(response.resp)
+                    }
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            })
+        }
+        $('.read-more').on('click', function (e) {
+            e.preventDefault();
+            $(this).closest('.post-body').find('.post-contenu').toggle("slow", function () {
+                if ($(this).css('display') === "block") {
+                    $(this).closest('.post-body').find('.read-more').text('Voir moins')
+                    $(this).closest('.post-body').find('.post-text').animate({'margin-bottom': "5px"}).find('p.short-desc').addClass('show').removeClass('overflow')
+                } else {
+                    $(this).closest('.post-body').find('.read-more').text('Voir plus')
+                    $(this).closest('.post-body').find('.post-text').removeAttr('style').find('p.short-desc').addClass('overflow').removeClass('show')
+                }
+            })
+        })
+        $('.post-footer-tools .btn-comment').on('click', async function (e) {
+            e.preventDefault()
+            const elem = this
+            $(elem).hasClass('arrow-down') ? $(this).removeClass('arrow-down').addClass('arrow-up') : $(this).removeClass('arrow-up').addClass('arrow-down')
+            await $(elem).closest('.post').find('.comment-container').toggle(300, function () {
+                const profileComments = elem.closest('.post').querySelector('.comment-container .comments-list').querySelectorAll('.profil-comment')
+                for (let i = 0; i < profileComments.length; i++) {
+                    cropImage(profileComments[i], profileComments[i].querySelector('img'))
+                }
+            })
+        })
+        $(document).ready(function() {
+            $('#form_contenus').summernote({
+                tabsize: 2,
+                placeholder: 'Contenu'
+            });
+            $('.comment-content').autolink()
+        });
+
+        async function cancelPost(e) {
+            e.preventDefault()
+            await $(e.target).closest('form').trigger('reset').closest('.new-post-container').toggle(300)
+            $('#form_contenus').summernote('reset')
+            $('html, body').animate({scrollTop: $('#published_post').offset().top}, 200, function() {
+                $('#published_post').removeClass('d-none')
+                $("#published_post").focus()
+            });
+        }
+        let active = false
+        function update(e, id) {
+            e.preventDefault()
+            if (active)
+            {
+                return false
+            }
+            active = true
+            const comment = $('.media[data-id="'.concat(id, '"]')),
+                message = comment.find('.comment-content').text()
+            comment.find('.comment-content').replaceWith(`
+                <div class="comment-content row">
+                    <div class="col-md-8 col-sm-12 position-relative">
+                        <textarea rows="1" class="form-control">${message}</textarea>
+                        <span class="text-danger d-none">La valeur ne peut être vide</span>
+                    </div>
+                    <div class="col-md-4 col-sm-12">
+                        <button class="btn btn-primary" title="Modifier"><i class="fa fa-pen"></i></button>
+                        <button class="btn btn-outline-secondary" title="Réinitialiser"><i class="fa fa-redo"></i></button>
+                        <button class="btn btn-danger" title="Annuler"><i class="fa fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            `)
+            comment.find('.comment-content textarea').focus()
+            comment.find('button[title="Annuler"]').on('click', function (e) {
+                e.preventDefault()
+                $(this).closest('.comment-content').replaceWith(`<div class="comment-content">${message}</div>`)
+                active = false
+                $('.comment-content').autolink()
+            })
+            comment.find('button[title="Modifier"]').on('click', async function (e) {
+                e.preventDefault()
+                const $this = this
+                $($this).find('i').removeClass('fa fa-pen').addClass('loader').prop('disabled', true)
+                const value = comment.find('.comment-content').find('textarea').val()
+                const response = await fetchAction("/in/edit/comment-".concat(id, '.html'), {value: value})
+                if (response.result === 'success') {
+                    $($this).find('i').addClass('fa fa-pen').removeClass('loader').prop('disabled', false)
+                    comment.find('.comment-content').replaceWith(`<div class="comment-content">${value}</div>`)
+                    active = false
+                    $('.comment-content').autolink()
+                    return false
+                }
+                const textarea = comment.find('.comment-content').find('textarea')
+                comment.find('.comment-content span.text-danger').removeClass('d-none')
+                $($this).find('i').addClass('fa fa-pen').removeClass('loader').prop('disabled', false)
+                textarea.on('input', function () {
+                    if ('' !== this.value) {
+                        comment.find('.comment-content span.text-danger').addClass('d-none')
+                    } else {
+                        comment.find('.comment-content span.text-danger').removeClass('d-none')
+                    }
+                })
+            })
+            comment.find('button[title="Réinitialiser"]').on('click', function (e) {
+                e.preventDefault()
+                $(this).closest('.comment-content').find('textarea').val(message).focus()
+            })
+
+        }
+
+        $('a.disabled').on('click', function (e) {
+            e.preventDefault()
+        })
+
+        async function remove(e, id, token) {
+            e.preventDefault()
+            if (confirm('Voulez-vous vraiment supprimer ce commentaire ?')) {
+                const response = await fetchAction("/in/remove/comment-".concat(id, ".html"), {_token: token})
+                if (response.result === 'success') {
+                    const comment = $('.media[data-id="'.concat(id, '"]'))
+                    comment.fadeOut("slow", function () {
+                        this.remove()
+                    })
+                    const opts = {
+                        "closeButton": true,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": true,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": true,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "10000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.success("Le commentaire a été supprimé ", '', opts);
+                } else {
+                    const opts = {
+                        "closeButton": true,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": true,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": true,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "10000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.error("Echec de la suppression du commentaire", '', opts);
+                }
+            } else {
+                return false
+            }
+        }
+
+    </script>
+{% endblock %}
+

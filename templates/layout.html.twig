@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/image/logo tribAdd.png') }}" />
+   <title>{% block title %}TribADD :Rassemblez votre tribu{% endblock %}</title>
+    <meta name="title" content="TribADD :Rassemblez votre tribu">
+    <meta name="description" content="RASSEMBLEZ VOTRE TRIBU. Bienvenue sur la plate-forme de réseaux communautaires TribADD..."/>
+    {% block stylesheets %}
+    <style type="text/css">
+        .cgu-link{
+            text-align: center;
+            margin-top: 6px;
+        }
+        .contact{
+            height: 40px; 
+            max-height: 40px; 
+            padding-top: 10px;
+        }
+        #ml-auto{
+            margin-left: auto;
+        }
+    </style>
+    {% endblock %}
+    {% block script %}{% endblock %}
+
+ <script async src="https://www.googletagmanager.com/gtag/js?id=UA-190276209-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-190276209-1');
+    </script>
+
+</head>
+<body class="body">
+<div class="d-flex mx-auto" style="max-width: 1020px">
+    <nav class="sub-body"></nav>
+    <div class="principal my-3 mx-2 px-2">
+        <canvas class="d-none"></canvas>
+        <div class="header">
+            <a class="back-to-home" title="accueil" href="{{ path('home') }}" ><img class="logo" src="{{ asset('assets/image/logo tribAdd.png') }}" alt="logo"></a>
+            <div class="header-title col-md-6 col-sm-12 mx-3">
+                <div class="menu-sm d-flex flex-row-reverse align-items-center flex-wrap my-3">
+                    {% if app.user %}
+                        <div class="header-title-menu-sm mt-2">
+                            <div class="photo-profile">
+                                <img class="rounded-circle d-none" src="{{ app.user.photo is null ? asset('assets/image/user.png') : asset('photo_de_profil/' ~ app.user.photo) }}" alt="pdp2" id="pdp">
+                            </div>
+                            <span class="mr-2">{{ '' != app.user.prenom ? app.user.prenom|capitalize : app.user.username }}</span>
+                            <div class="dropdown disconnect">
+                                <span class="btn-disconnect arrow-down" data-toggle="dropdown"></span>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <div class="mb-2">
+                                        <a style="font-weight: bold" class="dropdown-item" href="{{ path('myProfile') }}" >Mon profil</a>
+                                    </div>
+                                    <div>
+                                        <a style="font-weight: bold" class="dropdown-item" href="{{ path('home') }}" >Communautés</a>
+                                    </div><hr>
+                                    <a style="font-weight: bold" class="dropdown-item" href="{{ path('deconnexion') }}" >Déconnexion</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="rech mt-2 ml-2">
+                        <form action="{{ app.user ? path('recherce') : path('Defaultrecherce') }}" method="post">
+                            <div class="wrap">
+                                <div class="search">
+                                    <input name="mot-cle" type="text" autocomplete="off" class="searchTerm" placeholder="Recherche...">
+                                    <button type="submit" class="searchButton">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                     {% set path = app.user ? 'cguAccueil' : 'cguAccueilNotUser' %}
+                    <div class="contactez">
+                    {% set path = app.user ? 'contactNousAccueil' : 'contactNousAccueilNotUser' %}
+                    <a href="{{ path(path) }}" class="btn btn-yellow mt-2 contact" >Nous contacter</a>
+                    </div>
+                     <div class="cgu-link" style="margin-top:6px">
+                      <a  href="#" style=" font-size: 14px;color: rgba(13, 105, 180, 1)!important;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                    </div>
+                   
+                </div>
+                <h1 class="text-tribadd text-uppercase">rassemblez votre tribu</h1>
+                <p class="text-pr">Bienvenue sur la plate-forme de réseaux communautaires TribADD. Ce site vous permettra de créer une tribu, de rejoindre un groupe d’utilisateurs, de partager des centres d'intérêt communs, des thématiques, des formations, des documents, des forums et du savoir faire dans tous les domaines dans un espace sécurisé.</p>
+            </div>
+            <div id="ml-auto" class="menu">
+                {% if app.user %}
+                    <div class="header-title-menu">
+                        <div class="photo-profile">
+                            <img class="rounded-circle d-none" src="{{ app.user.photo is null ? asset('assets/image/user.png') : asset('photo_de_profil/' ~ app.user.photo) }}" alt="pdp2" id="pdp">
+                        </div>
+                        <span class="mr-2">{{ '' != app.user.prenom ? app.user.prenom|capitalize : app.user.username }}</span>
+                        <div class="dropdown disconnect">
+                            <span class="btn-disconnect arrow-down" data-toggle="dropdown"></span>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <div class="mb-2">
+                                    <a style="font-weight: bold" class="dropdown-item" href="{{ path('myProfile') }}" >Mon profil</a>
+                                </div>
+                                <div>
+                                    <a style="font-weight: bold" class="dropdown-item" href="{{ path('home') }}">Communautés</a>
+                                </div><hr>
+                                <a style="font-weight: bold" class="dropdown-item" href="{{ path('deconnexion') }}" >Déconnexion</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="rech mt-2">
+                    <form action="{{ app.user ? path('recherce') : path('Defaultrecherce') }}" method="post">
+                        <div class="wrap">
+                            <div class="search">
+                                <input name="mot-cle" type="text" class="searchTerm" autocomplete="off" placeholder="Recherche...">
+                                <button type="submit" class="searchButton">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                {% set path = app.user ? 'contactNousAccueil' : 'contactNousAccueilNotUser' %}
+                <div class="contactez">
+                    <a href="{{ path(path) }}" class="btn btn-yellow mt-2 w-100 contact" >Nous contacter</a>
+                </div>
+                <div class="cgu-link" style="margin-top:6px">
+                      <a  href="#" style=" font-size: 14px;color: rgba(13, 105, 180, 1)!important;font-weight: 100 !important;" data-toggle="modal" data-target="#exampleModalLong">Conditions générales d'utilisation</a>
+                </div>
+            </div>
+        </div>
+         <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+              <div class="modal-dialog" role="document" style="max-width: 700px;">
+                <div class="modal-content">
+                  <div class="modal-body">
+                     {% include 'user/cgu.html.twig' %}
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-yellow" data-dismiss="modal">Valider</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        <div class="content">
+            {% block loginSm %}{% endblock %}
+
+            {% block body %}
+
+                {% block article %}
+                {% endblock %}
+
+                {% block login %}
+                {% endblock %}
+
+            {% endblock %}
+
+        </div>
+    </div>
+</div>
+<script
+        src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+{#<script src="{{ asset('assets/script/jquery.facedetection.min.js') }}"></script>#}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/smartcrop/2.0.3/smartcrop.min.js" integrity="sha512-5tphGdlRPoaPKOe2Cooc4+zrNoXkW6sMN8uBgYgC5NGe9DfKQ2DbfMATa9fFl/eLDDSRDXSLARY5TDksDF/lug==" crossorigin="anonymous"></script>
+<script src="{{ asset('assets/script/cropImage.js') }}"></script>
+<script type="text/javascript">
+    {% if app.user %}
+    const container = document.querySelectorAll('.photo-profile')
+    for (let i = 0; i < container.length; i++)
+        cropImage(container[i], container[i].querySelector('img'))
+    {% endif %}
+</script>
+{% block javascripts %}
+
+{% endblock %}
+</body>
+</html>
+
+
+

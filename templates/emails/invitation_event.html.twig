@@ -1,0 +1,28 @@
+<div class="container">
+	<header style="background-color: rgba(13, 105, 180, 1); color: white; font-weight: bold; padding: 4px; border-radius: 10px">
+		<h2>Tribadd</h2>
+	</header><br>
+	<div class="content">
+		<p style="width: 100%">{{ communaute.titre|raw }}<hr></p>
+		{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+			<table style=" background-color: rgba(121,121,121,0.4); padding: 10px; border-radius: 5px; width: 100%">
+				<tr>
+					<td colspan="2" style="height: 30px">
+						<h4>{{ event.title }}</h4>
+					</td>
+				</tr>
+				<tr>
+					<td style="max-width: 100px;">
+						<img width="100px" class="d-none" src="http://tribadd.com/events/{{ event.image }}" alt="photo event">
+					</td>
+					<td style="vertical-align:top;">{{ event.description }}</td>
+				</tr>
+				<tr>
+					<td colspan="2">						
+						<a href="http://tribadd.com/calendars/voir_detail_event/{{ event.id }}" class="read-more">Participer</a>
+					</td>
+				</tr>
+			</table><hr>
+	
+	</div>
+</div>

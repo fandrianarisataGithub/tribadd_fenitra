@@ -1,0 +1,37 @@
+<div class="container">
+	<header style="background-color: rgba(13, 105, 180, 1); color: white; font-weight: bold; padding: 4px; border-radius: 10px">
+		<h2>Tribadd</h2>
+	</header><br><div class="content">
+		<p style="width: 100%">{{ contenu|raw }}<hr></p>
+		{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+		{% for p in posts %}
+			<table style=" background-color: rgba(121,121,121,0.4); padding: 10px; border-radius: 5px; width: 100%">
+				<tr>
+					<td colspan="2" style="height: 30px">
+						<h4>{{ p.titre }}</h4>
+					</td>
+				</tr>
+				<tr>
+					<td style="max-width: 100px;">
+						{% if p.type == 'P' or p.type is null %}<img width="100px" class="d-none" src="http://tribadd.com/imgEncadre/{{ p.imageEncadre }}" alt="photo de cadre">{% elseif p.type == 'A' %}<img width="100px" class="d-none" src="http://tribadd.com/articles/{{ p.imageEncadre }}" alt="photo article">{% elseif p.type == 'C' %}<img width="100px" class="d-none" src="http://tribadd.com/profil/{{ p.imageEncadre }}" alt="pdp2">{% elseif p.type == 'MC' %}<img width="100px" class="d-none" src="http://tribadd.com/profil/{{ p.imageEncadre }}" alt="pdc2">{% elseif p.type == 'V' %}<img width="100px" class="d-none" src="http://tribadd.com/miniature/{{ p.imageEncadre }}" alt="miniature">
+						{% endif %}
+					</td>
+					<td style="vertical-align:top; horiz-align: left; align: left">{{ p.shortDescription }}</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						{% if p.type == 'P' or p.type is null %}
+							<a href="http://tribadd.com/in/{{ p.commaunaute.urlPublic }}/post?id={{ p.id }}" class="read-more">Voir plus</a>
+						{% elseif p.type == 'A' %}
+							<a href="http://tribadd.com/in/{{ p.commaunaute.urlPublic }}/article?id={{ p.articleId }}">Lire l'article</a>
+						{% elseif p.type == 'C' or p.type == 'MC' %}
+							<a class="nav-link" href="http://tribadd.com/in/{{ p.commaunaute.urlPublic }}/presentation">Voir plus</a>
+						{% elseif p.type == 'V' %}
+							<a class="nav-link" href="http://tribadd.com/in/{{ p.commaunaute.urlPublic }}/video?id={{ p.articleId }}">Voir plus</a>
+						{% endif %}
+					</td>
+				</tr>
+			</table><hr>
+		{% endfor %}
+	</div>
+</div>

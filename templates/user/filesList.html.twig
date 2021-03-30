@@ -1,0 +1,70 @@
+{% for file in communaute.downloadSpaces %}
+    {% set ext = file.file|split('.')[1] %}
+    <div class="file-preview-frame krajee-default  kv-preview-thumb" data-id="{{ file.id }}" title="{{ file.fileOriginName }}">
+        <div class="kv-file-content">
+            {% if ext in ['jpg', 'jpeg', 'gif', 'png'] %}
+                <img src="{{ asset('upload-files/' ~ file.file) }}" class="file-preview-image kv-preview-data" title="page communauté.png" alt="page communauté.png" style="width: auto; height: auto; max-width: 100%; max-height: 100%; image-orientation: from-image;">
+            {% elseif ext in ['avi', 'mpg', 'mkv', 'mov', 'mp4', '3gp', 'webm', 'wmv'] %}
+                <video class="kv-preview-data file-preview-video" controls="" style="width: 213px; height: 160px;">
+                    <source src="{{ asset('upload-files/' ~ file.file) }}" type="video/mp4">
+                    <div class="file-preview-other">
+                        <span class="file-other-icon"><i class="fas fa-file-movie-o text-warning"></i></span>
+                    </div>
+                </video>
+            {% else %}
+                <div class="kv-preview-data file-preview-object file-object type-default">
+                <div class="file-preview-other">
+                    <span class="file-other-icon">
+                        {% if ext in ['xls', 'xlsx'] %}
+                            <i class="fas fa-file-excel text-success"></i>
+                        {% elseif ext in ['pdf'] %}
+                            <i class="fas fa-file-pdf text-danger"></i>
+                        {% elseif ext in ['zip'] %}
+                            <i class="fas fa-file-archive text-muted"></i>
+                        {% elseif ext in ['doc', 'docx'] %}
+                            <i class="fas fa-file-word text-primary"></i>
+                        {% elseif ext in ['ppt', 'pptx'] %}
+                            <i class="fas fa-file-powerpoint text-warning"></i>
+                        {% elseif ext in ['mp3', 'wav'] %}
+                            <i class="fas fa-file-audio text-warning"></i>
+                        {% elseif ext in ['txt'] %}
+                            <i class="fas fa-file-text text-info"></i>
+                        {% elseif ext in ['php', 'js', 'css', 'htm', 'html'] %}
+                            <i class="fas fa-file-code text-info"></i>
+                        {% elseif ext in ['apk'] %}
+                            <i class="fas fa-file-code text-success"></i>
+                        {% else %}
+                            <i class="fas fa-file text-secondary"></i>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="file-thumbnail-footer">
+                <div class="file-footer-caption" title="Raport_hebdomadaire du semaine 25012021.xlsx">
+                    <div class="file-caption-info">{{ file.fileOriginName }}</div>
+                    <div class="file-size-info"> <samp>({{ (file.fileSize/1000)|number_format(2, '.', ',') }} KB)</samp></div>
+                    <div class="file-date-info">{{ file.createdAt|date('d/m/y à H:i') }}</div>
+                </div>
+                <div class="file-actions">
+                    <div class="file-footer-buttons">
+                        {% if app.user == communaute.user or membre is defined and membre is not null and membre.role is not null %}
+                            <a href="{{ asset('upload-files/' ~ file.file) }}" download="{{ file.fileOriginName }}" type="button" class="kv-file-upload btn btn-sm btn-kv btn-default btn-outline-secondary" title="Télécharger le fichier"{% if ext in ['avi', 'mpg', 'mkv', 'mov', 'mp4', '3gp', 'webm', 'wmv'] %} target="_blank"{% endif %}>
+                                <i class="glyphicon glyphicon-download"></i>
+                            </a>
+                        {% endif %}
+                        {% if app.user == communaute.user or file.user == app.user or membre is defined and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <button type="button" class="kv-file-remove btn btn-sm btn-kv btn-default btn-outline-secondary remove-file" onclick="fileRemove(event)" title="Supprimer le fichier">
+                                <i class="glyphicon glyphicon-trash"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+    </div>
+{% else %}
+    <h2>VIDE</h2>
+{% endfor %}

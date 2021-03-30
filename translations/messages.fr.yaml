@@ -1,0 +1,32 @@
+# Securité
+security:
+  login:
+    page_title: Connexion
+    already_connected: Vous êtes déjà connecté en tant que
+  form:
+    user:
+      placeholder: Email ou pseudo
+    password:
+      placeholder: Mot de passe
+    submit: Connexion
+    password_forgotten: Mot de passe oublié
+    not_member: Pas encore membre ?
+    sign_in: S'inscrire
+  password:
+    page_title: Mot de passe oublié
+    email: Saisir votre adresse email
+    placeholder: Saisir ici votre adresse email
+    submit: Valider
+    sent: Un email a été envoyé à l'adresse "<strong>user_email</strong>" pour la réinitialisation du mot de passe
+    notfound: L'utilisateur avec l'adresse email "<strong>user_email</strong>" est introuvable dans notre base de données
+    reset:
+      title: Réinitialisation de mot de passe
+      label: Saisir votre nouveau mot de passe
+      placeholder: Saisir ici votre mot de passe
+      invalid_code: Code de réinitialisation invalide
+
+# Pages
+page:
+  home:
+    text1: Cofident est une messagerie instantanée simple et conviviale.
+    text2: Connectez-Vous!

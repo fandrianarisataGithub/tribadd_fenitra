@@ -1,0 +1,372 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" />
+<style>
+    .input-container {
+        display: -ms-flexbox; /* IE10 */
+        display: flex;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    .url {
+        padding: 5px;
+        background: rgba(121,121,121, 0.666);
+        color: white;
+        text-align: center;
+        height: 29px;
+    }
+</style>
+{% endblock %}
+{% block title %}{{ com.titre }}{% endblock %}
+{% block metaTitle %}{{ com.titre }}{% endblock %}
+{% block meta %}{{ com.descCourt }}{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            {{ form_start(form, {'attr': {'class': 'community-form', 'id': 'form-edit-community', 'enctype': "multipart/form-data"}}) }}
+                <h5 class="form-title">Améliorez votre tribu</h5>
+                <div class="form-group">
+                    {{ form_widget(form.titre,{'attr':{'onblur':'test()'}}) }}
+                    {{ form_errors(form.titre) }}
+                    <div id="k51"></div>
+                </div>
+                <div class="form-group">
+                    {{ form_widget(form.sousTitre) }}
+                    {{ form_errors(form.sousTitre) }}
+                     
+                </div>
+                <div class="form-group">
+                    {{ form_widget(form.descCourt) }}
+                    {{ form_errors(form.descCourt) }}
+                    <div id="k160"></div>
+                </div>
+                <div class="form-group">
+                    <div class="custom-file">
+                         <input type="file" name="photoProfil" class="custom-file-input" id="customFileCover" lang="fr">
+                        <label class="custom-file-label" for="customFileCover" data-reset-label="Séléctionnez photo couverture">Séléctionnez photo couverture</label>
+                    </div>
+                     <p style="font-size: 11px;margin-left: 20px;line-height: 1.2;opacity: 0.7;">"Nous vous conseillons d'utiliser une photo <br>de taille raisonnable afin de faciliter  <br> l'affichage pour vos visiteurs" (Nous vous <br> conseillons une taille maximum de 500 Ko)</p>
+                </div>
+                <div class="form-group">
+                    <div class="custom-file">
+                        <input type="file" name="photoCouverture" class="custom-file-input" id="customFileProfile" lang="fr">
+                        <label class="custom-file-label" for="customFileProfile" data-reset-label="Séléctionnez photo profil">Séléctionnez photo profil</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    {{ form_widget(form.siteWeb) }}
+                    {{ form_errors(form.siteWeb) }}
+                </div>
+            <div class="form-group">
+                <div class="input-container">
+                    <span class="url">tribadd.com/in/</span>
+                    <input required type="text" name="urlPublic" placeholder="URL Publique" id="urlP" class="form-control" value="{{ com.urlPublic }}">
+                </div>
+            </div>
+            <div id="error">
+
+            </div>
+                <textarea name="decriptionLongue" hidden></textarea>
+            {{ form_end(form) }}
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center flex-column align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ com.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/'~com.photoCouverture) }}" alt="photo de couverture4" id="img_preview">
+                </div>
+                <div class="community-title">
+
+                    <div class="community-profil d-flex justify-content-center flex-column align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ com.photoProfil is null ? asset('assets/image/empty-image-min.jpg') :  asset('profil/'~com.photoProfil) }}" alt="photo de profile4" id="img_preview_deux" class="d-none">
+                       
+                    </div>
+                     {% if app.user and app.user.id == com.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                         <a class="text-decoration-none" style="position: relative;left: 147px;top: -58px;" href="{{ path('editMyCommunaute', {urlPublic: com.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                          {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ com.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ com.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" rel="noreferrer noopener" href="#" class="site-web" id="website">{{ com.siteWeb }}</a>
+                        <p><span>tribadd.com/in/</span><span id="urlPublic">{{ com.urlPublic }}</span></p>
+                        <p id="short-description">{{ com.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'communaute': com, 'parametrage': ' disabled'} %}
+            <hr class="separator">
+            <div class="community-tools">
+                <div class="form-group">
+                    <textarea cols="100%" id="summernote">{{ com.descLong|raw }}</textarea>
+                </div>
+                <div class="form-group">
+                    <button id="next" class="btn btn-yellow btn-submit kModif">Modifier</button>
+                    <a class="btn btn-yellow" href="{{ path('home') }}" >Revenir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+    <script>
+        $(function() {
+             $('#form_titre').on('input', function() {
+                 var titre = $(this).val();
+                 var cal = titre.length;
+                  if (cal > 51) {
+                      $('#k51').html();
+                    $('#k51').html('<p style="color:red;">La taille du titre ne doit pas dépasser les 51 caractères</p>');
+                    e.preventDefault();
+                  }else{
+                     $('#k51').html();
+                     var text = "Vous avez saisi "+cal+"/51 caractères";
+                      $('#k51').html('<p>'+text+'</p>');
+                  }
+                
+
+             });
+             $('#form_descCourt').on('input', function() {
+                 var description = $(this).val();
+                 var cal = description.length;
+                  if (cal > 160) {
+                     $('#k160').html();
+                    $('#k160').html('<p style="color:red;">La taille de description ne doit pas dépasser les 160 caractères</p>');
+                    e.preventDefault();
+                  }else{
+                    $('#k160').html();
+                     var text = "Vous avez saisi "+cal+"/160 caractères";
+                      $('#k160').html('<p>'+text+'</p>');
+                  }
+                
+
+             });
+          });
+        function  test(){
+            let titre = $("#form_titre").val().toLowerCase().replaceAll(" ", "-");
+            $("#urlP").attr('value',titre);
+            $('#urlPublic').text($("#urlP").val());
+            verif();
+        }
+        function verif() {
+            let url = $("#urlP").val();
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', '/in/verif/url?url='+url);
+            xhr.onreadystatechange = function () {
+                if(xhr.readyState === 4){
+                    let resp = JSON.parse(xhr.response);
+                    if(resp.taille > 0 && '{{ com.urlPublic }}' !== url){
+                        $("#error").html('<p style="color: red; font-size: 13px; background-color: rgba(255,228,225,0.66); padding: 5px; border-radius: 5px">tribadd.com/in/'+url+' existe déjà. Changez votre url publique </p>')
+                        $("#next").attr('disabled',true)
+                    }else{
+                        $("#error").html('');
+                        $("#next").attr('disabled',false)
+                    }
+                }
+            };
+            xhr.send();
+        }
+        (function () {
+            const canvas = $('canvas')[0];
+            const ctx = canvas.getContext('2d');
+            let img;
+            const containerCouv = document.querySelector('.community-background')
+            const originCouv = document.querySelector('#img_preview')
+            const containerPro = document.querySelector('.community-profil')
+            const originPro = document.querySelector('#img_preview_deux')
+            $('#customFileCover').change(function() {
+                preview(this.files);
+            });
+
+            $('#customFileProfile').change(function() {
+                previewDeux(this.files);
+            });
+            function preview(files) {
+                if (files.length > 0) {
+                    var file = files[0];
+                    if (
+                        typeof FileReader !== 'undefined' &&
+                        file.type.indexOf('image') != -1
+                    ) {
+                        var reader = new FileReader();
+                        // Note: addEventListener doesn't work in Google Chrome for this event
+                        reader.onload = function(evt) {
+                            cropImage(evt.target.result, containerCouv, originCouv);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                } else {
+                    cropImage("{{ com.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/'~com.photoCouverture) }}", containerCouv, originCouv)
+                }
+            }
+            function previewDeux(files){
+                if (files.length > 0) {
+                    var file = files[0];
+                    if (
+                        typeof FileReader !== 'undefined' &&
+                        file.type.indexOf('image') != -1
+                    ) {
+                        var reader = new FileReader();
+                        // Note: addEventListener doesn't work in Google Chrome for this event
+                        reader.onload = function(evt) {
+                            cropImage(evt.target.result, containerPro, originPro);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                } else {
+                    cropImage("{{ com.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/'~com.photoProfil) }}", containerPro, originPro)
+                }
+            }
+
+            function cropImage (src, container, origin) {
+                if (src.match(/assets\/image\/empty-image-min\.jpg/i)) {
+                    origin.setAttribute('src', src)
+                    return false
+                }
+                load(src)
+
+                function load(src) {
+                    $(origin).addClass('d-none')
+                    $(container).find('div.water').removeClass('d-none')
+                    img = new Image();
+                    img.onload = function() {
+                        run();
+                    };
+                    img.src = src;
+                }
+
+                function run() {
+                    if (!img) return;
+                    var options = {
+                        width: container.offsetWidth,
+                        height: container.offsetHeight,
+                        minScale: 1,
+                        ruleOfThirds: true,
+                        debug: true
+                    };
+                    var analyzeOptions = analyze.bind(this, options);
+                    analyzeOptions();
+                }
+                function analyze(options) {
+                    smartcrop.crop(img, options, draw);
+                }
+
+                function draw(result) {
+                    var selectedCrop = result.topCrop;
+                    drawCrop(selectedCrop);
+                }
+
+                function drawCrop(crop) {
+                    canvas.width = container.offsetWidth;
+                    canvas.height = container.offsetHeight;
+                    ctx.drawImage(
+                        img,
+                        crop.x,
+                        crop.y,
+                        crop.width,
+                        crop.height,
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    );
+                    $(origin).attr('src', canvas.toDataURL(img.type))
+                    $(origin).removeClass('d-none')
+                    $(container).find('div.water').addClass('d-none')
+                }
+            }
+        })()
+        function formCut() {
+            if ($('.community-form-container').css('display') === 'none') {
+                $('.community-form').appendTo('.community-form-container-sm')
+            } else {
+                $('.community-form').appendTo('.community-form-container')
+            }
+        }
+        formCut()
+        $(window).on('resize', function () {
+            formCut()
+        })
+        $('.btn-submit').on('click', function (e) {
+            var titre = $('#form_titre').val();
+            var description = $('#form_descCourt').val();
+            if ((titre.length >= 51 && description.length >= 160) || (titre.length <= 51 && description.length >= 160) || (titre.length >= 51 && description.length <= 160) ) {
+                if (titre.length >= 51) {
+                      $('#k51').html('<p>La taille du titre ne doit pas dépasser les 51 caractères</p>');
+                     e.preventDefault();
+                }
+                if (description.length >= 160) {
+                   $('#k160').html('<p>La taille du titre ne doit pas dépasser les 160 caractères');
+                     e.preventDefault();
+                }
+            }else{
+                
+            e.preventDefault()
+            $('textarea[name="decriptionLongue"]').val($('#summernote').val())
+            document.querySelector('#form-edit-community').submit()
+            }
+        })
+
+        $(document).ready(function() {
+            $('#summernote').summernote({
+                tabsize: 2,
+            });
+        });
+        $(".custom-file-input").on("change", function(e) {
+            if (e.target.files.length == 0) {
+                $(this).siblings(".custom-file-label").removeClass("selected").html($(this).siblings(".custom-file-label").data('reset-label'));
+                return
+            }
+
+            const fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+        $('#form_titre').on('input', function (e) {
+            if ('' !== $(this).val().trim()) {
+                $('#title').text($(this).val())
+            } else {
+                $('#title').text('Titre communauté')
+            }
+        })
+        $('#form_sousTitre').on('input', function (e) {
+            if ('' !== $(this).val().trim()) {
+                $('#subtitle').text($(this).val())
+            } else {
+                $('#subtitle').text('Sous-titre')
+            }
+        })
+        $('#form_descCourt').on('input', function (e) {
+            if ('' !== $(this).val().trim()) {
+                $('#short-description').text($(this).val())
+            } else {
+                $('#short-description').text('Description courte')
+            }
+        });
+        $('#urlP').on('input', function (e) {
+            if ('' !== $(this).val().trim()) {
+                $('#urlPublic').text($(this).val())
+                verif()
+            } else {
+                $('#urlPublic').text('url-public')
+            }
+        });
+        $('#form_siteWeb').on('input', function (e) {
+            if ('' !== $(this).val().trim()) {
+                $('#website').prop('href', $(this).val()).prop('target', '__blank').text($(this).val())
+            } else {
+                $('#website').removeAttr('target').text('www.siteweb.mg')
+            }
+        });
+    </script>
+{% endblock %}
+

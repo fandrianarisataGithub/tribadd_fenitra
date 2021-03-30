@@ -1,0 +1,431 @@
+{% extends 'layout2.html.twig' %}
+
+{% block stylesheets %}
+
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" />
+
+    <style>
+
+        /* The colour of the indicators */
+
+
+
+    </style>
+
+{% endblock %}
+
+{% block title %}Forum de discussion de votre communauté{% endblock %}
+{% block metaTitle %}forum de discussion de votre communauté{% endblock %}
+{% block meta %}Echangeons nos idées , notre savoir,  apportons nos conseils , nos avis dans le forum de TribADD et recevez les réponses dans les plus brefs délais{% endblock %}
+
+{% block body %}
+
+    <div class="main">
+
+        <div class="header-comm-sm">
+
+            <div class="community-form-container-sm">
+
+                <div class="container-menu">
+
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+
+                </div>
+
+            </div>
+
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+
+        </div>
+
+        {% block loginSm %}{{ parent() }}{% endblock %}
+
+        <div class="community-form-container">
+
+            <div class="sub-container"></div>
+
+            <div class="container-menu">
+
+                {% block container %}{{ parent() }}{% endblock %}
+
+            </div>
+
+        </div>
+
+        <div class="community-container">
+
+            <div class="community-header">
+
+                <div class="community-background d-flex justify-content-center align-items-center">
+
+                    <div class="water loader-md"></div>
+
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+
+                </div>
+
+                <div class="community-title">
+
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+
+                        <div class="water loader-md"></div>
+
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp  communaute" class="d-none">
+
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+
+                    <div class="community-description">
+
+                        <h1 id="title">{{ communaute.titre }}</h1>
+
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% include 'user/navbar.html.twig' with {'forum': ' disabled'} %}
+
+            <hr class="separator">
+
+           
+
+                {% if app.user == communaute.user or membre is defined and membre is not null and membre.role is not null %}
+
+                    <button class="btn btn-click btn-yellow mb-4 w-fit-content" id="published_post" onclick="showPostForm(event)">Ajouter un sujet</button>
+
+                    <div class="new-post-container">
+
+                        <div class="card my-4">
+
+                                <div class="card-body" style="width: 100%;">
+
+                                     {{ form_start(form, {'attr': {'id': 'published-post'}}) }}
+
+                                <div class="form-group">
+
+                                    {{ form_widget(form.titre, {'attr': {'placeholder': 'titre de sujet'}}) }}
+
+                                    {{ form_errors(form.titre) }}
+
+                                </div>
+
+                                <div class="form-group">
+
+                                    {{ form_widget(form.contenu, {'attr': {'class': 'contenu summernote'}}) }}
+
+                                    {{ form_errors(form.contenu) }}
+
+                                </div>
+
+                                <div class="form-group">
+
+                                    <div class="col-12">
+
+                                        <input name="btnPost" type="submit" class="btn btn-sm btn-yellow" value="AJOUTER">
+                                        <a href="#" class="btn btn-sm btn-yellow cancel" >ANNULER</a>
+
+                                    </div>
+
+                                </div>
+
+                                {{ form_end(form) }}
+
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+           
+
+                <div class="community-body">
+
+                    <div class="posts-list">
+
+                        {% for f in forums|reverse %}
+
+                            <div class="forum-titre" data-id="{{ f.id }}">
+
+                                <div class="card mb-2">
+
+                                    <div class="card-body p-2 p-sm-3">
+
+                                        <div class="media forum-item">
+
+                                            <img src="{{ f.user.photo is null ? asset('assets/image/user.png') : asset('photo_de_profil/' ~ f.user.photo) }}" class="mr-3 rounded-circle" width="50" height="50" alt="User" />
+
+                                            <div class="media-body" style="width: 610px;">
+
+                                                    <h4> <a href="{{ path('showForum', {id:f.id,urlPublic: communaute.urlPublic}) }}">{{ f.titre }} </a></h4>
+
+                                             <p class="text-muted"><b>{{ f.user.username }} </b> <time>il y a <span class="text-secondary font-weight-bold"><time>{{ f.createAt|date('d/m/Y à H:i') }}</span></time></p>
+
+                                            </div>
+
+                                              <div class="text-muted small text-center align-self-center" style="margin-right: 15px;">
+
+                                                {% if app.user and communaute.user == app.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.suppression == 1 %}
+
+                                                    <a onclick="removeForum(event, {{ f.id }}, '{{ csrf_token('remove'~f.id) }}')" class="btn btn-default" href="#"><i class="fa fa-trash-alt"></i></a>
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="col-md-12">
+
+                                <h2>Il n'y a pas de sujet</h2>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+        </div>
+
+
+
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/fr.min.js" integrity="sha512-RAt2+PIRwJiyjWpzvvhKAG2LEdPpQhTgWfbEkFDCo8wC4rFYh5GQzJBVIFDswwaEDEYX16GEE/4fpeDNr7OIZw==" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            $('.contenu').summernote({
+
+                tabsize: 2,
+
+                height:200,
+
+                placeholder: 'Contenu'
+
+            });
+
+        });
+
+
+
+        $('.forum').on('click', function(){
+
+             const id = $(this).attr('data-id');
+
+             alert(id);
+
+        });
+
+
+
+        const fetchAction = async function (url, data = {}) {
+
+            const response = await fetch(url, {
+
+                credentials: 'same-origin',
+
+                headers: {
+
+                    'X-Requested-With': 'XMLHttpRequest',
+
+                    "content-type": "application/json"
+
+                },
+
+                method: 'POST',
+
+                body: JSON.stringify(data)
+
+            });
+
+            if (response.ok) {
+
+                return response.json()
+
+            } else {
+
+                let error = await response.json()
+
+                throw new Error(error.message)
+
+            }
+
+        }
+
+        const removeForum = async function (e, id, token) {
+
+            e.preventDefault()
+
+            if (!confirm('Voulez-vous vraiment supprimer ce sujet ?')) return
+
+            const response = await fetchAction("/in/remove/forum-".concat(id), {'_token': token})
+
+            if (response.result === 'success') {
+
+                const opts = {
+
+                    "closeButton": true,
+
+                    "debug": false,
+
+                    "newestOnTop": false,
+
+                    "progressBar": true,
+
+                    "positionClass": "toast-top-right",
+
+                    "preventDuplicates": true,
+
+                    "onclick": null,
+
+                    "showDuration": "300",
+
+                    "hideDuration": "1000",
+
+                    "timeOut": "10000",
+
+                    "extendedTimeOut": "1000",
+
+                    "showEasing": "swing",
+
+                    "hideEasing": "linear",
+
+                    "showMethod": "fadeIn",
+
+                    "hideMethod": "fadeOut"
+
+                };
+
+                toastr.success("Le sujet a été supprimé! Vous allez quitter la page", '', opts);
+
+                $(e.target).closest('.forum-titre').fadeOut('slow', function () {
+
+                    this.remove()
+
+                })
+
+            } else {
+
+                const opts = {
+
+                    "closeButton": true,
+
+                    "debug": false,
+
+                    "newestOnTop": false,
+
+                    "progressBar": true,
+
+                    "positionClass": "toast-top-right",
+
+                    "preventDuplicates": true,
+
+                    "onclick": null,
+
+                    "showDuration": "300",
+
+                    "hideDuration": "1000",
+
+                    "timeOut": "10000",
+
+                    "extendedTimeOut": "1000",
+
+                    "showEasing": "swing",
+
+                    "hideEasing": "linear",
+
+                    "showMethod": "fadeIn",
+
+                    "hideMethod": "fadeOut"
+
+                };
+
+                toastr.error("Echec de la suppression de sujet", '', opts);
+
+            }
+
+        }
+
+
+
+        const bloqueForum = async function (e, id) {
+
+            e.preventDefault()
+
+            if (!confirm('Voulez-vous vraiment bloqué ce sujet ?')) return
+
+            const response = await fetchAction("/in/bloque/forum-".concat(id))
+
+            if (response.result === "success") {
+
+                e.target.innerText = "débloqué"
+
+            }
+
+        }
+
+        
+
+        $('.btn-click').on('click', function(e){
+
+            e.preventDefault();
+
+            $('.new-post-container').css('display', 'block');
+
+        });
+         $('.cancel').on('click', function(e){
+
+            e.preventDefault();
+
+            $('.new-post-container').css('display', 'none');
+
+        });
+        cancel
+
+    </script>
+
+{% endblock %}
+
+
+

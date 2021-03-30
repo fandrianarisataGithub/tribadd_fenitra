@@ -1,0 +1,144 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+
+{% endblock %}
+
+{% block title %}TribADD | Rassemblez votre tribu{% endblock %}
+
+{% block meta %} {% endblock %}
+
+{% block body %}
+
+    <div class="create-community">
+
+        <a href="{{ path('newCommunity') }}" class="btn btn-blue" {% if app.user is null %}onclick="message(event)"{% endif %}>créer votre propre réseau communautaire en quelques clics</a>
+
+    </div>
+
+    <div class="main">
+
+        {% block article %}
+
+            <div class="community-list-container">
+
+                <h2 class="community-list-title">
+                    Liste des membres par communauté
+                </h2>
+                <form method="post" action="{{ path('listComMembre') }}">
+                    <select class="form-control form-control-lg" id ="selectionComm">
+                      <option value="0">Selectionnez votre communauté</option>
+                        {% for c in communaute|reverse %}
+                            <option value="{{ c.id }}">{{ c.titre }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+
+                <div id="affichage" style="margin-top: 20px;">
+                    
+                </div>
+                
+
+                <hr class="separator">
+                <a href="{{ path('home') }}" class="btn btn-yellow float-right" style="margin-right: 15px;">Retour</a>
+               
+
+            </div>
+
+    {% endblock %}
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+   <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/fr.min.js" integrity="sha512-RAt2+PIRwJiyjWpzvvhKAG2LEdPpQhTgWfbEkFDCo8wC4rFYh5GQzJBVIFDswwaEDEYX16GEE/4fpeDNr7OIZw==" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+
+
+        const fetchAction = async function (url, data = {}) {
+
+            const response = await fetch(url, {
+
+                credentials: 'same-origin',
+
+                headers: {
+
+                    'X-Requested-With': 'XMLHttpRequest',
+
+                    "content-type": "application/json"
+
+                },
+
+                method: 'POST',
+
+                body: JSON.stringify(data)
+
+            });
+
+            if (response.ok) {
+
+                return response.json()
+
+            } else {
+
+                let error = await response.json()
+
+                throw new Error(error.message)
+
+            }
+
+        }
+
+        
+        $( "#selectionComm" ).change(async function() {
+          var selectedCountry = $(this).children("option:selected").val();
+           const response = await fetchAction("/in/liste/membre-par-communaute?selectionComm=".concat(selectedCountry))
+
+            if (response.message === "success") {
+                const target = $('#affichage');
+                let tr = ''
+                if (response.data.length==0 ){
+                    
+                    tr +="<tr><td class='text-center' colspan='4'><b>Il n'y a pas de membre</b></td></tr>"
+                }else{
+                   
+                   response.data.forEach(function(data) {
+                       tr  += `<tr><td width="25%">${data.nom} ${data.prenom}</td><td width="35%">${data.adresse}</td><td width="30%">${data.mail}</td><td width="25%">${data.dateInscrit}</td></tr>`
+                    });
+                }
+                const html = `
+                    <table class="table table-bordered">
+                     <thead>
+                      <tr class="table-info text-center" style="font-weight: bold;">
+                        <td>Nom et prenom </td><td width="35%">Adresse</td><td>E-mail</td><td>Date d'inscription</td>
+                      </tr>
+                      </thead>
+                      <tbody>
+                        
+                      ${tr}
+                      </tbody>
+                      
+                    </table>
+                `
+                target.html(html)
+
+            }
+        });
+        
+
+    </script>
+
+{% endblock %}
+
+
+

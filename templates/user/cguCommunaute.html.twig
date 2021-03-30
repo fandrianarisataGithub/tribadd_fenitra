@@ -1,0 +1,119 @@
+
+{% extends 'layout2.html.twig' %}
+
+{% block title %}{{ communaute.titre }}{% endblock %}
+ {% block meta %}{{ communaute.descCourt }}{% endblock %}
+
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp  communaute" class="d-none">
+                    </div>
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'forum': ' disabled'} %}
+            <hr class="separator">
+         
+                
+             <h2 class="community-list-title font-weight-bold"><span  style="font-size: 20px;">Conditions générales d’utilisation de TribADD (CGU)</span></h2>
+             <h3 class="community-list-title font-weight-bold">Bienvenue sur TribADD</h3>
+             <div class="ml-4">
+                 <p>TribADD est une plateforme de gestion de réseaux communautaires. TribADD permet donc à tous de créer et fédérer sa communauté. Il s’agit donc d’un moyen de rassembler des personnes de provenances diverses autour d’une idée, d’un concept, d’un loisir ou d’un produit ou tout autre centre d’intérêt qui n’est pas listé en exclusion (voir liste d’exclusion).</p>
+
+                 <p><b>L’utilisation de TribADD est gratuite </b> pour tous les visiteurs, les membres des communautés et les fondateurs (et administrateurs) de communautés.</p> 
+
+                <p>Pour répondre à l’objectif de promotion, toutes les publications et tous les contenus mis à disposition par les communautés seront visibles sur Internet. A ce titre, le contenu de ces communautés pourra être indexé par les moteurs de recherche. </p>
+
+                <p>Il n’en va pas de même des données personnelles des utilisateurs (voir paragraphe suivant). </p>
+            </div>
+            <h3 class="community-list-title font-weight-bold">Les fonctionnalités proposées par TribADD</h3>
+            <ul style="list-style: none;">
+                <li>-&nbsp;&nbsp;   Mise à disposition d’une page d’accueil de communauté</li>
+                <li>-&nbsp;&nbsp;   Mise à disposition d’une page de présentation de la communauté</li>
+                <li>-&nbsp;&nbsp;   Gestion des publications (posts)</li>
+                <li>-&nbsp;&nbsp;   Gestion des articles </li>
+                <li>-&nbsp;&nbsp;   Gestion de vidéos</li>
+                <li>-&nbsp;&nbsp;   Mise à disposition d’un espace de téléchargement (espace limité)</li>
+                <li>-&nbsp;&nbsp;   Espace de messagerie instantanée</li>
+                <li>-&nbsp;&nbsp;   Prochainement : Forum intégré à chaque communauté</li>
+                <li>-&nbsp;&nbsp;   Prochainement : Génération de newsletter envoyées périodiquement aux membres</li>
+            </ul>
+            <h3 class="community-list-title font-weight-bold">Gestion des données personnelles des utilisateurs</h3>
+            <div class="ml-4">
+                <p>Un utilisateur qui s’inscrit sur TribADD renseignera une fiche d’inscription. Une inscription unique sera suffisante même si l’utilisateur souhaite par la suite devenir membres de plusieurs communautés présentes sur TribADD. </p>
+
+                <p>Les données d’inscription des membres sont visibles uniquement par l’équipe de TribADD, ainsi que par les fondateurs et administrateur des communautés dont l’utilisateur deviendra membre.</p>
+
+                <p>Les données d’inscription sont pour la plupart facultatives. </p>
+
+                <p>Les données obligatoires indiquées par les membres lors de leur inscription sont :<b> Le pseudo, le mot de passe et l’adresse Mail.</b> Le pseudo est un texte libre, qui est unique sur l’ensemble des inscrits à TribADD.<b> Le pseudo est la seule information qui sera visible par les autres membres et visiteurs des communautés. </b></p>
+
+                <p>L’utilisateur peut, par ailleurs, indiquer les informations suivantes, qui sont facultatives : Son nom et prénom, son adresse et son numéro de téléphone, un site Web de référence et un texte de description. Nous insistons bien sur le fait que ces dernières informations sont facultatives et ne seront visibles que par l’équipe de TribADD ainsi que par les fondateurs et administrateur des communautés dont l’utilisateur deviendra membre. </p>
+
+                <p><b>L’équipe de TribADD s’engage : Aucune donnée ne sera transmise par l’équipe de TribADD à qui que ce soit, personne ou entreprise.</b></p>
+
+                <p><b>Les fondateurs et administrateurs des communautés s’engagent, par l’acceptation de ces conditions générales d’utilisation : Aucune donnée ne sera transmise à qui que ce soit, personne ou entreprise.</b></p>
+            </div>
+            <h3 class="community-list-title font-weight-bold">Utilisation des communautés</h3>
+                <p class="ml-4">L’utilisation de TribADD par des gestionnaires de communautés à des fins de promotion commerciale est totalement autorisée.</p> 
+            <h4 class="community-list-title font-weight-bold">Liste d’exclusion</h4>
+            <ul style="list-style: none;">
+                <li>-&nbsp;&nbsp;   Sujets ayant attrait à la politique, aux religions ou à la pornographie. </li>
+                <li>-&nbsp;&nbsp;   Sujets présentant des idées à caractère raciste</li>
+                <li>-&nbsp;&nbsp;   Sujets ayant attrait à la violence physique ou psychologique, quelle qu’elle soit. </li>
+                <li>-&nbsp;&nbsp;   Tout autre sujet qui pourrait être considéré comme illégal ou pouvant porter préjudice. </li>
+            </ul>
+            <h4 class="community-list-title font-weight-bold">Modération</h4>
+            <div class="ml-4">
+                <p>Toute publication ne répondant pas aux critères de la liste d’exclusion devra en premier lieu être supprimé par les administrateurs des communautés. Les administrateurs de communautés s’y engagent en signant ces présentes conditions générales d’utilisation.</p>
+
+                <p>Un membre d’une communauté pourra être bloqué par un administrateur si ses publications ou commentaires ne sont pas en accord avec cette liste d’exclusion. </p>
+
+                <p>En dernier recours, l’équipe de TribADD s’engage à procéder à cette modération si elle n’est pas faite par les administrateurs des communautés. De même, et pour cette même raison, un membre d’une communauté pourra être bloqué par l’équipe de TribADD. </p>
+
+                <p>Enfin, l’équipe de TribADD se réserve le droit de fermer toute communauté dont le sujet principal, ou les publications répétées, seraient en désaccord avec cette liste d’exclusion. </p>
+                </div>
+                <h4 class="community-list-title font-weight-bold">Désinscription</h4>
+                <div class="ml-4">
+                <p>Tout membre d’une communauté peut à tout moment quitter la communauté. Un lien sur la page d’accueil de la communauté (en bas à gauche) permet de quitter la communauté. Lorsqu’un membre quitte la communauté, ces données personnelles sont supprimées de la base de données de la communauté, y compris l’adresse mail. Ces données ne sont donc plus visibles par les administrateurs de la communauté. Seul le pseudo reste visible (avec comme attribut « Ancien membre »). </p>
+
+                <p>Un utilisateur de TribADD qui n’est plus membre d’aucune communauté peut se désinscrire de TribADD. Ces données sont alors supprimées. Seul le pseudo reste visible (avec comme attribut « Ancien membre »). </p>
+                 <hr>
+                <div style="padding-bottom: 46px;">
+                     <a href="javascript:history.back();" class="btn btn-yellow float-right">Annuler</a>
+                </div>
+            </div>
+      
+        </div>
+    </div>
+
+{% endblock %}

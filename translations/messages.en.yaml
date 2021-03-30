@@ -1,0 +1,27 @@
+# Securité
+security:
+  login:
+    page_title: Login
+    already_connected: You are already connected as
+  form:
+    user:
+      placeholder: User
+    password:
+      placeholder: Password
+    submit: Log In
+    password_forgotten: Forgotten password.
+    not_member: Not yet member ?
+    sign_in: Sign In
+  password:
+    page_title: Password forgotten
+    email: Enter your email address
+    placeholder: Enter here your email address
+    submit: Submit
+    sent: An email has been sent to the address "<strong>user_email</strong>" to reset the password
+    notfound: The user with the email address "<strong>user_email</strong>" was not found in our database
+
+# Pages
+page:
+  home:
+    text1: Cofident is a simple and friendly instant messenger.
+    text2: Login You!

@@ -1,0 +1,103 @@
+<nav class="navbar navbar-expand-md navbar-light">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+        <ul class="navbar-nav mr-auto community-navbar mt-2 mt-md-0 flex-wrap">
+            <li class="nav-item">
+                {% if parametrage is defined %}
+                        <a class="nav-link{{ parametrage is defined ? parametrage : '' }}" href="#"><i class="fas fa-cog"></i>&nbsp;paramétrage</a>
+                   
+                {% else %}
+                        <a class="nav-link{{ presentation is defined ? presentation : '' }}" href="{{ app.user ? path('UsershowPresentation', {urlPublic: communaute.urlPublic}) : path('showPresentation', {urlPublic: communaute.urlPublic}) }}" ><i class="fas fa-eye"></i>présentation</a>
+                   
+                {% endif %}
+            </li>
+            <li class="nav-item">
+                <a class="nav-link{{ showCommunity is defined ? showCommunity : '' }}" 
+                href="{{ app.user ? path('ShowmyCommunaute', {urlPublic: communaute.urlPublic}) : path('ShowmyCommunaute1', {urlPublic: communaute.urlPublic}) }}" >
+                <i class="fas fa-newspaper"></i>&nbsp;publications</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link{{ showArticleCommunity is defined ? showArticleCommunity : ''  }}" 
+                href="{{ app.user ? path('userShowArticles', {urlPublic: communaute.urlPublic}) : path('showArticles', {urlPublic: communaute.urlPublic}) }}" >
+                <i class="fas fa-newspaper"></i>&nbsp;articles</a>
+            </li>
+            {#<li class="nav-item">
+                <a class="nav-link" href="{{ path('myPhotos', {id: communaute.id}) }}" >Mes photos</a>
+            </li>#}
+            <li class="nav-item">
+                <a class="nav-link{{ showVideo is defined ? showVideo : '' }}" 
+                    href="{{ app.user ? path('indexVideo', {urlPublic: communaute.urlPublic}) : path('listVideo', {urlPublic: communaute.urlPublic}) }}" >
+                    <i class="fas fa-video"></i>&nbsp;vidéos</a>
+            </li>
+            <li class="nav-item">
+                  <a class="nav-link{{  app.user ? (downloadSpace is defined ? downloadSpace:''):' disabled' }}" 
+                  href="{{ path('downloadSpace', {urlPublic: communaute.urlPublic}) }}" >
+                  <i class="fas fa-file-download"></i>&nbsp;téléchargements</a>
+            </li>
+            {% if membre is defined and membre is not null and membre.role is not null or membre is not defined or membre is defined and membre is null %}
+            <li class="nav-item">
+                <a class="nav-link{{ app.user ? (chat is defined ? chat : (membre is defined and membre is not null ? '' : ' disabled')) : ' disabled' }}" 
+                href="{{ path('chat', {urlPublic: communaute.urlPublic}) }}">
+                <i class="fas fa-comment-dots"></i>&nbsp;chat</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link{{ forum is defined ? forum : '' }}" 
+                href="{{ app.user ? path('forum', {urlPublic: communaute.urlPublic}) : path('defaultforum', {urlPublic: communaute.urlPublic}) }}" >
+                <i class="fas fa-file-contract"></i>&nbsp;forum</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link{{ contact is defined ? contact : '' }}" 
+                href="{{ app.user ? path('contactNous', {urlPublic: communaute.urlPublic}) : path('contactUs', {urlPublic: communaute.urlPublic}) }}" >
+                <i class="fas fa-file-signature"></i>&nbsp;nous contacter</a>
+            </li>
+            {% if app.user %}
+                {% if membre is defined and membre is not null %}
+                {# nisi bugg teto satria null le role (prod newsletter) #}
+                        {#% if membre.role.libelle == 'administrateur' or membre.role.libelle == 'membre' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('newsletter', {urlPublic: communaute.urlPublic}) }}" >
+                                    <i class="fas fa-envelope-open"></i>&nbsp;newsletter</a>
+                            </li>
+                         {% endif %}
+                {# nisi bugg teto satria null le role (prod newsletter) #}
+                {% else %}
+                    {% if communaute.isAbonneNewsLetter(app.user) or app.user.id == communaute.user.id %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('newsletter', {urlPublic: communaute.urlPublic}) }}" >
+                                <i class="fas fa-envelope-open"></i>&nbsp;newsletter</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            <li class="nav-item">
+                {# mbola amboarina le class sy le url #}
+                <a 
+                    href="{{ path('showCalendar', {'id': communaute.getId()}) }}" 
+                    {% if clicked is defined %}
+                        class="nav-link {{ calendar is defined ? calendar : '' }} disabled"
+                        {% else %}
+                        class="nav-link {{ calendar is defined ? calendar : '' }}"
+                    {% endif %}
+                    >
+                    <i class="fas fa-calendar "></i>&nbsp;Calendrier
+                </a>
+            </li>
+        </ul>
+    </div>
+    {#{% if app.user and chat is not defined %}
+    <div class="fix-contactez {{ app.user  ? (chat is defined ? chat : '') : ' d-none' }}">
+        {% if membre is defined and membre is not null  %}
+            <a href="{{ path('chat', {id: communaute.id}) }}">
+                <img src="{{ asset('assets/image/chat.png') }}" alt="tchat" width="120"/>
+            </a>
+        {% elseif app.user.id == communaute.user.id %}
+            <a href="{{ path('chat', {id: communaute.id}) }}">
+                <img src="{{ asset('assets/image/chat.png') }}" alt="tchat" width="120"/>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}#}
+</nav>

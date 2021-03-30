@@ -1,0 +1,144 @@
+#div_fb{
+   display: flex;
+   align-items: center;
+}
+.fc-event-main:hover{
+   cursor: pointer;
+}
+#form_couleur_fond{
+    width: 50px;
+    margin-left: 15px;
+}
+.modal-header {
+   background: #0d69b4;
+   border-radius: 0;
+}
+.modal-header h5{
+   color: #fff;
+}
+.close{
+   color: #fff;
+}
+.modal-footer{
+   justify-content: space-between;
+}
+.button_action{
+   text-align: start;
+}
+#btn_add_event{
+   background: #0d69b4;
+   display: inline-flex;
+   justify-content: center;
+   align-items: center;
+   height: 30px;
+   padding: 5px;
+   border-radius: 25px;
+   width: 180px;
+   text-align: center;
+   margin-bottom: 15px;
+   border : 1px solid #0d69b4;
+}
+#btn_add_event:hover{
+   background: transparent;
+   text-decoration: none;
+}
+#btn_add_event:hover span{
+  color: #0d69b4;
+}
+#btn_add_event span{
+   color: #fff;
+   font-size: 12px;
+}
+.img-desc{
+   display: block !important;
+}
+
+.image-encadre{
+   width: 100%;
+   margin: auto !important;
+   display: block !important;
+}
+image-encadre img{
+   width: 100% !important;
+   height: auto !important;
+   border-radius: 0 !important;
+}
+h3.mt-4{
+   text-align: center;
+}
+p.col-md-8{
+   margin-top: 25px;
+   padding-left: 0;
+}
+div.d-flex.flex-column > p{
+   padding-left: 15px;
+}
+div.post-contenu p{
+   padding-left: 15px;
+}
+.fc-daygrid-event{
+   font-size: 10px !important;
+   font-weight: 500 !important;
+}
+.fa-spinner{
+   margin-right: 5px;
+   color: #fff;
+   animation: mihodina 3s infinite;
+   position: relative;
+   bottom: 1px;
+   display: none;
+}
+
+@keyframes mihodina{
+   0%{
+      transform: rotate(50deg)
+   }
+   25%{
+      transform: rotate(100deg)
+   }
+   50%{
+      transform: rotate(150deg)
+   }
+   60%{
+      transform: rotate(200deg)
+   }
+   70%{
+      transform: rotate(260deg)
+   }
+   85%{
+      transform: rotate(300deg)
+   }
+   100%{
+      transform: rotate(360deg)
+   }
+}
+@media all and (max-width : 768px){
+   .post-contenu{
+      width: 480px !important;
+      margin: auto;
+   }
+   .post-contenu iframe{
+      width: 480px !important;
+   }
+   .fc .fc-toolbar {
+       display: flex;
+      flex-direction: column !important;
+       justify-content: space-between;
+       align-items: center;
+   }
+}
+
+@media all and (max-width : 480px){
+   .community-body>a{
+      margin-top: 15px;
+   }
+   
+   .post-contenu{
+      width: 320px !important;
+      margin: auto;
+   }
+   .post-contenu iframe{
+      width: 320px !important;
+   }
+}
+

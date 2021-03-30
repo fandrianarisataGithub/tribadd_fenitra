@@ -1,0 +1,188 @@
+{% extends 'layout.html.twig' %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" crossorigin="anonymous" />
+{% endblock %}
+{% block loginSm %}
+    <div class="login-sm mb-5">
+        <form class="login-form" method="post" action="{{ path('login') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <div class="form-header">
+                <img src="{{ asset('assets/image/tete-removebg-preview.png') }}" alt="photo2">
+            </div>
+            <div class="form-body">
+                <h5 class="form-body-title">se connecter</h5>
+                {% if error %}
+                    <h5 class="text-danger text-center">
+                        l'authentification n'est pas validé
+                    </h5>
+                {% endif %}
+                <input type="text" class="form-control mb-3" name="_username" placeholder="nom d'utilisateur" 
+                    {% if lastUsername %}
+                        value="{{ lastUsername }}"
+                    {% endif %} required>
+                <input type="password" class="form-control" name="_password" placeholder="mot de passe" required>
+                {#<div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="remember_me">
+                    <label class="form-check-label" for="remember_me">Ne pas se souvenir de moi</label>
+                </div>#}
+                <!--<div class="g-recaptcha" data-sitekey='6LdnoP8ZAAAAAO-nSKyWryqEU7RV0xClG3JWaLc8'></div>-->
+                <button class="btn btn-yellow">connexion</button>
+                <a href="{{ path('passForgot') }}" class="form-mdp-forgot">mot de passe oublié?</a>
+                <a href="{{ path('registerUser') }}" class="form-sing-up">s'inscrire</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+{% block body %}
+    <div class="create-community">
+        <button class="btn btn-blue" {% if app.user is null %}onclick="message(event)"{% endif %}>créer votre propre réseau communautaire en quelques clics</button>
+    </div>
+    <div class="main">
+        {% block article %}
+            <div class="community-list-container">
+                <h2 class="community-list-title font-weight-bold">
+                    Les réseaux communautaires
+                </h2>
+                <div class="community-lists">
+                {% for c in communaute|reverse %}
+                    <div class="community">
+                        <a target="_blank" href="{{ path('ShowmyCommunaute1', {urlPublic:c.urlPublic}) }}" class="community-image d-flex justify-content-center align-items-center">
+                            <div class="water loader-md"></div>
+                            <img class="d-none" src="{{ asset('profil/'~c.photoProfil) }}" alt="photo de profil">
+                        </a>
+                        <div class="community-content">
+                            <div class="community-content-title-container"><a target="_blank" href="{{ path('ShowmyCommunaute1', {urlPublic:c.urlPublic}) }}" class="community-content-title">{{ c.titre }}</a>
+                                &nbsp;&nbsp;({{ c.membres|length + 1 }}&nbsp;membre{{ c.membres|length + 1 < 2 ? '' : 's' }})
+                            </div>
+                            <div class="community-content-body">
+                                {{ c.descCourt }}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                <h1>vide</h1>
+                {% endfor %}
+                </div>
+            </div>
+
+        {% endblock %}
+        {% block login %}
+        <div class="login">
+            <form class="login-form" method="post" action="{{ path('login') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                <div class="form-header">
+                    <img src="{{ asset('assets/image/tete-removebg-preview.png') }}" alt="photo2">
+                </div>
+                <div class="form-body">
+                    <h5 class="form-body-title">se connecter</h5>
+                    {% if error %}
+                        <h5 class="text-danger text-center">
+                            l'authentification n'est pas validé
+                        </h5>
+                    {% endif %}
+                    <input type="text" class="form-control mb-3" name="_username" placeholder="nom d'utilisateur" {% if lastUsername %}value="{{ lastUsername }}"{% endif %} required>
+                    <input type="password" class="form-control" name="_password" placeholder="mot de passe" required>
+                    {#<div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="remember_me">
+                        <label class="form-check-label" for="remember_me">Ne pas se souvenir de moi</label>
+                    </div>#}
+                    <div class="g-recaptcha" data-sitekey='6LdnoP8ZAAAAAO-nSKyWryqEU7RV0xClG3JWaLc8'></div>
+                    <button class="btn btn-yellow">connexion</button>
+                    <a href="{{ path('passForgot') }}" class="form-mdp-forgot">mot de passe oublié?</a>
+                    <a href="{{ path('registerUser') }}" class="form-sing-up">s'inscrire</a>
+                </div>
+            </form>
+        </div>
+        {% endblock %}
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <!--<script src="https://www.google.com/recaptcha/api.js"></script>-->
+    <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+    <script>
+        (function () {
+            const container = document.querySelectorAll('.community-image')
+            for (let i = 0; i < container.length; i++) {
+                const canvas = $('canvas')[0];
+                const ctx = canvas.getContext('2d');
+                let img;
+                const origin = container[i].querySelector('img')
+
+                load(origin.getAttribute('src'))
+
+                function load(src) {
+                    $(origin).addClass('d-none')
+                    $(container).find('div.water').removeClass('d-none')
+                    img = new Image();
+                    img.onload = function() {
+                        run();
+                    };
+                    img.src = src;
+                }
+
+                function run() {
+                    if (!img) return;
+                    var options = {
+                        width: container[i].offsetWidth,
+                        height: container[i].offsetHeight,
+                        minScale: 1,
+                        ruleOfThirds: true,
+                        debug: true
+                    };
+                    var analyzeOptions = analyze.bind(this, options);
+                    analyzeOptions();
+                }
+                function analyze(options) {
+                    smartcrop.crop(img, options, draw);
+                }
+
+                function draw(result) {
+                    var selectedCrop = result.topCrop;
+                    drawCrop(selectedCrop);
+                }
+
+                function drawCrop(crop) {
+                    canvas.width = container[i].offsetWidth;
+                    canvas.height = container[i].offsetHeight;
+                    ctx.drawImage(
+                        img,
+                        crop.x,
+                        crop.y,
+                        crop.width,
+                        crop.height,
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    );
+                    $(origin).attr('src', canvas.toDataURL(img.type))
+                    $(origin).removeClass('d-none')
+                    $(container[i]).find('div.water').addClass('d-none')
+                }
+            }
+        })()
+        function message(e) {
+            e.preventDefault()
+            toastr["info"]("Veuillez vous connecter avant de créer une communauté.")
+
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+        }
+    </script>
+{% endblock %}

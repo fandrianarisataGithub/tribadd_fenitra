@@ -1,0 +1,107 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+  <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+{% endblock %}
+{% block title %}Contacter le chef de la tribu par email{% endblock %}
+{% block metaTitle %}contacter le chef de la tribu par email{% endblock %}
+{% block meta %}Pour toute demande de renseignements , compléments d'informations sur un sujet ou sur votre communauté, contactez votre chef de tribu directement par email.{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp  communaute" class="d-none">
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                         {% endif %}
+                     {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' with {'contact': ' disabled'} %}
+            <hr class="separator">
+            <div class="container mb-5 p-4">
+                {% for message in app.session.flashbag.get('success') %}
+                    <div class="alert mx-3 alert-success alert-dismissible fade show" style="font-weight: bold; font-size: 20px">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+                <div class="col-md-12">
+                    {{ form_start(form) }}
+                    <div class="row">
+                        {% if app.user == null %}
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <input required type="text" name="username" class="form-control" placeholder="Votre nom">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <input required type="email" name="email" class="form-control" placeholder="Votre adresse email">
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="col-md-12">
+                            <div class="form-group">
+                            {{ form_widget(form.contenu, {'attr': {'rows': '4','class': 'contenu summernote'}}) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group ml-auto">
+                            <input type="submit" value="Envoyer" class="btn btn-sm btn-yellow">
+                            <a href="javascript:history.back();" class="btn btn-sm btn-outline-secondary">Annuler</a>
+                        </div>
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+ <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+ <script type="text/javascript">
+ $(document).ready(function() {
+            $('.contenu').summernote({
+                tabsize: 2,
+                height:200,
+                placeholder: 'Contenu'
+            });
+            $('.comment-content').autolink();
+           
+        });
+    </script>
+{% endblock %}
+

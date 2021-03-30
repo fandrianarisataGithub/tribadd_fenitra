@@ -1,0 +1,14 @@
+swiftmailer:
+    transport: smtp
+    username: tribadd2021.jmc@gmail.com
+    password: nPfwTExQLKdDRH47
+    host: smtp-relay.sendinblue.com
+    port: '587'
+    encryption: tls
+    auth-mode: login
+    spool: { type: 'memory' }
+    stream_options:
+        ssl:
+            allow_self_signed: true
+            verify_peer: false
+            verify_peer_name: false

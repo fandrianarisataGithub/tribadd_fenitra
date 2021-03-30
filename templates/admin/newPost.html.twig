@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AdminController!{% endblock %}
+
+{% block body %}
+    <br>
+    <h2>Nouvelle article</h2><hr>
+    {{ form_start(form, {'attr':{'enctype':'multipart/form-data'}}) }}
+    {{ form_row(form.titre) }}
+    {{ form_row(form.sous_titre) }}
+    <input type="file" name="image_encadre" required onchange="preview(event)">
+    {#<input name="photo" type="file" id="file" class="photo">#}
+    <div>
+        <img src="/assets/image/default.jpg" alt="default" width="175px" height="200px" class="image-preview" id="img_preview">
+    </div>
+    <input type="file" name="image_fond" required onchange="previewDeux(event)">
+    {#<input name="photo" type="file" id="file" class="photo">#}
+    <div>
+        <img src="/assets/image/default.jpg" alt="default" width="175px" height="200px" class="image-preview" id="img_preview_deux">
+    </div>
+    {{ form_row(form.contenus) }}
+    <input type="submit" class="btn btn-sm btn-primary" value="Enregistrer">
+    {{ form_end(form) }}
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function preview(event){
+            let reader = new FileReader();
+            let img_preview = document.getElementById('img_preview');
+
+            reader.onload = function () {
+                if(reader.readyState === 2){
+                    img_preview.src = reader.result;
+                }
+            };
+            reader.readAsDataURL(event.target.files[0])
+        }
+        function previewDeux(event){
+            let reader = new FileReader();
+            let img_preview = document.getElementById('img_preview_deux');
+
+            reader.onload = function () {
+                if(reader.readyState === 2){
+                    img_preview.src = reader.result;
+                }
+            };
+            reader.readAsDataURL(event.target.files[0])
+        }
+    </script>
+{% endblock %}

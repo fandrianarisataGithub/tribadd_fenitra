@@ -1,0 +1,259 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+{% endblock %}
+{% block title %}{{ communaute.titre }}{% endblock %}
+{% block meta %}{{ communaute.descCourt }}{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp  communaute" class="d-none">
+                    </div>
+                     {% if app.user and app.user.id == com.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                         <a class="text-decoration-none" style="position: relative;left: 147px;top: -58px;" href="{{ path('editMyCommunaute', {urlPublic: com.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                    {% endif %}
+                    <div class="community-description">
+                        <h1 id="title">{{ communaute.titre }}</h1>
+                        <h2 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h2>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' %}
+            <hr class="separator">
+            <div class="mb-5 p-4">
+                <h3>Modifiez votre publication</h3>
+                {% for message in app.session.flashBag.get('success') %}
+                    <div class="alert mt-3 alert-success alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+                <div class="d-flex justify-content-center align-items-center flex-column">
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'form-edit', 'id': 'form_edit'}}) }}
+                    <div class="form-group">
+                        <label for="image_encadre">Image mise en avant</label>
+                        <input type="file" id="image_encadre" class="d-none" name="image_encadre">
+                        <div class="community-profil m-0 d-flex justify-content-center align-items-center">
+                            {% if post.type == 'P' or post.type is null %}
+                                {% set path = 'imgEncadre/'~ post.imageEncadre %}
+                            {% elseif post.type == 'A' %}
+                                {% set path = 'articles/'~ post.imageEncadre %}
+                            {% elseif post.type == 'C' %}
+                                {% set path = 'profil/'~ post.imageEncadre %}
+                            {% elseif post.type == 'MC' %}
+                                {% set path = 'couverture/'~ post.imageEncadre %}
+                            {% elseif post.type == 'V' %}
+                                {% set path = 'imgEncadre/video.jpg' %}
+                            {% endif %}
+                            <img src="{{ post.imageEncadre is null ? asset('assets/image/empty-image-min.jpg'): asset(path) }}" alt="photo de cadre" id="img_preview" onclick="fileOpen(event)" style="cursor: pointer">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {{ form_widget(form.titre) }}
+                        {{ form_errors(form.titre) }}
+                        <div id="k51"></div>
+                    </div>
+                    <div class="form-group">
+                        {{ form_widget(form.shortDescription) }}
+                        {{ form_errors(form.shortDescription) }}
+                         <div id="k160"></div>
+                    </div>
+                    <div class="form-group">
+                        {{ form_widget(form.contenus) }}
+                        {{ form_errors(form.contenus) }}
+                        <div class="invalid-feedback">
+                            Ce champ ne peut pas être vide.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-12">
+                            <input name="btnPost" type="submit" class="btn btn-sm btn-yellow editPost" value="Modifier">
+                            <a href="{{ path('ShowmyCommunaute', {urlPublic: post.commaunaute.urlPublic}) }}" class="btn btn-sm btn-outline-secondary">Annuler</a>
+                        </div>
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+             $('#form_titre').on('input', function() {
+                 var titre = $(this).val();
+                 var cal = titre.length;
+                  if (cal > 51) {
+                      $('#k51').html();
+                    $('#k51').html('<p style="color:red;">La taille du titre ne doit pas dépasser les 51 caractères</p>');
+                    e.preventDefault();
+                  }else{
+                     $('#k51').html();
+                     var text = "Vous avez saisi "+cal+"/51 caractères";
+                      $('#k51').html('<p>'+text+'</p>');
+                  }
+                
+
+             });
+             $('#form_shortDescription').on('input', function() {
+                 var description = $(this).val();
+                 var cal = description.length;
+                  if (cal > 160) {
+                     $('#k160').html();
+                    $('#k160').html('<p style="color:red;">La taille de description ne doit pas dépasser les 160 caractères</p>');
+                    e.preventDefault();
+                  }else{
+                    $('#k160').html();
+                     var text = "Vous avez saisi "+cal+"/160 caractères";
+                      $('#k160').html('<p>'+text+'</p>');
+                  }
+                
+
+             });
+            $('.editPost').click(function(e){
+                var titre = $('#form_titre').val();
+                var description = $('#form_shortDescription').val();
+
+                if (titre.length >= 51) {
+                      $('#k51').html('<p>La taille du titre ne doit pas dépasser les 51 caractères</p>');
+                     e.preventDefault();
+                }
+                if (description.length >= 160) {
+                   $('#k160').html('<p>La taille de description ne doit pas dépasser les 160 caractères</p>');
+                     e.preventDefault();
+                }
+             });
+          });
+        function fileOpen(e) {
+            e.preventDefault();
+            $('#image_encadre').click()
+        }
+
+        $(document).ready(function() {
+            $('#form_contenus').summernote({
+                tabsize: 2,
+                placeholder: 'Contenu'
+            });
+            $('#form_edit').on('submit', function (e) {
+                if($('#form_contenus').summernote('isEmpty')) {
+                    e.preventDefault()
+                    $('#form_contenus').addClass('is-invalid')
+                }
+            })
+        });
+        (function () {
+            const canvas = $('canvas')[0];
+            const ctx = canvas.getContext('2d');
+            let img;
+            const container = document.querySelector('.community-profil')
+            const origin = document.querySelector('#img_preview')
+
+            $('#image_encadre').change(function() {
+                handleFiles(this.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    var file = files[0];
+                    if (
+                        typeof FileReader !== 'undefined' &&
+                        file.type.indexOf('image') != -1
+                    ) {
+                        var reader = new FileReader();
+                        // Note: addEventListener doesn't work in Google Chrome for this event
+                        reader.onload = function(evt) {
+                            load(evt.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                } else {
+                    load("{{ app.user.photo is null ? asset('assets/image/empty-image-min.jpg') : asset('imgEncadre/' ~ post.imageEncadre) }}")
+                }
+            }
+
+            load(origin.src)
+
+            function load(src) {
+                if (src.match(/assets\/image\/empty-image-min\.jpg/i)) {
+                    origin.setAttribute('src', src)
+                    return false
+                }
+                $(origin).addClass('d-none')
+                $(container).find('div.water').removeClass('d-none')
+                img = new Image();
+                img.onload = function() {
+                    run();
+                };
+                img.src = src;
+            }
+
+            function run() {
+                if (!img) return;
+                var options = {
+                    width: container.offsetWidth,
+                    height: container.offsetHeight,
+                    minScale: 1,
+                    ruleOfThirds: true,
+                    debug: true
+                };
+                var analyzeOptions = analyze.bind(this, options);
+                analyzeOptions();
+            }
+            function analyze(options) {
+                smartcrop.crop(img, options, draw);
+            }
+
+            function draw(result) {
+                var selectedCrop = result.topCrop;
+                drawCrop(selectedCrop);
+            }
+
+            function drawCrop(crop) {
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+                ctx.drawImage(
+                    img,
+                    crop.x,
+                    crop.y,
+                    crop.width,
+                    crop.height,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+                $(origin).attr('src', canvas.toDataURL(img.type))
+                $(origin).removeClass('d-none')
+                $(container).find('div.water').addClass('d-none')
+            }
+        })()
+    </script>
+{% endblock %}

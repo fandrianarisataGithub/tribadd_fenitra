@@ -1,0 +1,182 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css">
+{% endblock %}
+{% block title %}{{ communaute.titre }}{% endblock %}
+{% block meta %}{{ communaute.descCourt }}{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <div class="community-form-container-sm">
+                <div class="container-menu">
+                    {% block container_sm %}{{ parent() }}{% endblock %}
+                </div>
+            </div>
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        {% block loginSm %}{{ parent() }}{% endblock %}
+        <div class="community-form-container">
+            <div class="sub-container"></div>
+            <div class="container-menu">
+                {% block container %}{{ parent() }}{% endblock %}
+            </div>
+        </div>
+        <div class="community-container">
+            <div class="community-header">
+                <div class="community-background d-flex justify-content-center align-items-center">
+                    <div class="water loader-md"></div>
+                    <img class="d-none" src="{{ communaute.photoCouverture is null ? asset('assets/image/empty-image-min.jpg') : asset('couverture/' ~ communaute.photoCouverture) }}" alt="pdc communaute">
+                </div>
+                <div class="community-title">
+                    <div class="community-profil d-flex justify-content-center align-items-center">
+                        <div class="water loader-md"></div>
+                        <img src="{{ communaute.photoProfil is null ? asset('assets/image/empty-image-min.jpg') : asset('profil/' ~ communaute.photoProfil) }}" alt="pdp  communaute" class="d-none">
+                    </div>
+                    {% if app.user %}
+                        {% if app.user and app.user.id == communaute.user.id or app.user and membre is not null and membre.role is not null and membre.role.libelle == 'administrateur' %}
+                            <a class="text-decoration-none" style="position: relative;left: 145px;top: -59px;" href="{{ path('editMyCommunaute', {urlPublic: communaute.urlPublic}) }}"><i class="fa fa-pen"></i></a>
+                        {% endif %}
+                    {% endif %}
+                    <div class="community-description">
+                        <h2 id="title">{{ communaute.titre }}</h2>
+                        <h5 class="sous-titre" id="subtitle">{{ communaute.sousTitre }}</h5>
+                        <a target="_blank" rel="noreferrer noopener" href="{{ communaute.siteWeb }}" class="site-web" id="website">{{ communaute.siteWeb }}</a>
+                        <p id="short-description">{{ communaute.descCourt }}</p>
+                    </div>
+                </div>
+            </div>
+            {% include 'user/navbar.html.twig' %}
+            <hr class="separator">
+            <div class="row mb-5 p-4">
+                <div class="col-md-12 px-1">
+                    {% set url_back = app.request.headers.get('referer') is not null and app.request.headers.get('referer') == absolute_url(path('editDroits', {id: communaute.id})) or app.request.headers.get('referer') is not null and app.request.headers.get('referer') == absolute_url(path('newCommunity')) ? path('ShowmyCommunaute', {id: communaute.id}) : app.request.headers.get('referer') %}
+                    {% set url_back = app.request.headers.get('referer') is null ? path('ShowmyCommunaute', {id: communaute.id}) : url_back %}
+                    <h1 style="display: none;">Modifier les droits sur la tribu</h1>
+                    <h2>Modifier les droits sur la tribu</h2>
+                    <button class="btn btn-outline-info mb-3" title="ajouter un nouveau droit" onclick="addNew(event)"><i class="fa fa-plus-circle"></i></button>
+                    {% for message in app.session.flashBag.get('success') %}
+                        <div class="alert alert-success alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                    {% macro printCommunauteRow(role) %}
+                        <div class="col-sm-12 mb-sm-2 col-md-4 js-communaute-item">
+                            <div class="card">
+                                <div class="card-header d-flex">
+                                    {{ form_widget(role.libelle, {'attr': {'class': 'mr-3'}}) }}
+                                    <button class="btn btn-sm btn-danger position-absolute js-remove-communaute" style="right: 0; top: 0;">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        {{ form_label(role.droitsUtilisateur.visualisation, 'Visualisation', {'attr_label': {'class': 'form-check-label'}}) }}
+                                        {{ form_widget(role.droitsUtilisateur.visualisation, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_errors(role.droitsUtilisateur.visualisation) }}
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form_label(role.droitsUtilisateur.creation, 'Création', {'attr_label': {'class': 'form-check-label'}}) }}
+                                        {{ form_widget(role.droitsUtilisateur.creation, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_errors(role.droitsUtilisateur.creation) }}
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form_label(role.droitsUtilisateur.modification, 'Modification', {'attr_label': {'class': 'form-check-label'}}) }}
+                                        {{ form_widget(role.droitsUtilisateur.modification, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_errors(role.droitsUtilisateur.modification) }}
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form_label(role.droitsUtilisateur.suppression, 'Suppression', {'attr_label': {'class': 'form-check-label'}}) }}
+                                        {{ form_widget(role.droitsUtilisateur.suppression, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_errors(role.droitsUtilisateur.suppression) }}
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form_label(role.droitsUtilisateur.commentaire, 'Commentaire', {'attr_label': {'class': 'form-check-label'}}) }}
+                                        {{ form_widget(role.droitsUtilisateur.commentaire, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_errors(role.droitsUtilisateur.commentaire) }}
+                                    </div>
+                                </div>
+                            </div>
+                            {{ form_widget(role.description, {'attr': {'class': 'form-control mt-1'}}) }}
+                        </div>
+                    {% endmacro %}
+                    {% import _self as formMacro %}
+                    {{ form_start(form, {'attr': {'id': 'form_communaute'}}) }}
+                        <div class="row js-communaute-wrapper" data-prototype="{{ formMacro.printCommunauteRow(form.roles.vars.prototype)|e('html_attr') }}" data-index="{{ form.roles|length }}">
+                            {% for role in form.roles %}
+                                <div class="col-sm-12 mb-sm-2 col-md-4 js-communaute-item">
+                                    <div class="card">
+                                        <div class="card-header">{{ role.libelle.vars.value }}</div>
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                {{ form_label(role.droitsUtilisateur.visualisation, 'Visualisation', {'attr_label': {'class': 'form-check-label'}}) }}
+                                                {{ form_widget(role.droitsUtilisateur.visualisation, {'attr': {'class': 'form-check-input'}}) }}
+                                                {{ form_errors(role.droitsUtilisateur.visualisation) }}
+                                            </div>
+                                            <div class="form-check">
+                                                {{ form_label(role.droitsUtilisateur.creation, 'Création', {'attr_label': {'class': 'form-check-label'}}) }}
+                                                {{ form_widget(role.droitsUtilisateur.creation, {'attr': {'class': 'form-check-input'}}) }}
+                                                {{ form_errors(role.droitsUtilisateur.creation) }}
+                                            </div>
+                                            <div class="form-check">
+                                                {{ form_label(role.droitsUtilisateur.modification, 'Modification', {'attr_label': {'class': 'form-check-label'}}) }}
+                                                {{ form_widget(role.droitsUtilisateur.modification, {'attr': {'class': 'form-check-input'}}) }}
+                                                {{ form_errors(role.droitsUtilisateur.modification) }}
+                                            </div>
+                                            <div class="form-check">
+                                                {{ form_label(role.droitsUtilisateur.suppression, 'Suppression', {'attr_label': {'class': 'form-check-label'}}) }}
+                                                {{ form_widget(role.droitsUtilisateur.suppression, {'attr': {'class': 'form-check-input'}}) }}
+                                                {{ form_errors(role.droitsUtilisateur.suppression) }}
+                                            </div>
+                                            <div class="form-check">
+                                                {{ form_label(role.droitsUtilisateur.commentaire, 'Commentaire', {'attr_label': {'class': 'form-check-label'}}) }}
+                                                {{ form_widget(role.droitsUtilisateur.commentaire, {'attr': {'class': 'form-check-input'}}) }}
+                                                {{ form_errors(role.droitsUtilisateur.commentaire) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{ form_widget(role.description, {'attr': {'class': 'form-control mt-1'}}) }}
+                                </div>
+                                {{ form_widget(role.libelle, {'attr': {'readonly': '', 'class': 'd-none'}}) }}
+                            {% endfor %}
+                            <input type="hidden" value="{{ csrf_token('edit-' ~ communaute.id) }}" name="_token">
+                            <div class="col-md-12">
+                                <input type="submit" class="btn btn-yellow" value="valider">
+                                <a href="{{ url_back }}" class="btn btn-yellow">Revenir</a>
+                            </div>
+                        </div>
+                    {{ form_rest(form) }}
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+        function addNew(e) {
+            e.preventDefault()
+            const $wrapper = $('.js-communaute-wrapper');
+            let prototype =$wrapper.data('prototype')
+            let index = $wrapper.data('index')
+
+            const newForm = prototype.replace(/__name__/g, index)
+
+            $wrapper.data('index', index + 1)
+
+            $('#form_communaute input[name="_token"]').before(newForm)
+        }
+
+        (function ($) {
+            const $wrapper = $('.js-communaute-wrapper');
+            $wrapper.on('click', '.js-remove-communaute', function(e) {
+                e.preventDefault()
+                $(this).closest('.js-communaute-item')
+                    .fadeOut()
+                    .remove()
+            })
+        })(jQuery)
+    </script>
+{% endblock %}

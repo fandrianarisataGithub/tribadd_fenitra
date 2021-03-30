@@ -1,0 +1,262 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+
+{% endblock %}
+
+{% block title %}TribADD | Rassemblez votre tribu{% endblock %}
+
+{% block meta %} {% endblock %}
+
+{% block body %}
+
+    <div class="create-community">
+
+        <a href="{{ path('newCommunity') }}" class="btn btn-blue" {% if app.user is null %}onclick="message(event)"{% endif %}>créer votre propre réseau communautaire en quelques clics</a>
+
+    </div>
+
+    <div class="main">
+
+        {% block article %}
+
+            <div class="community-list-container">
+
+                <h2 class="community-list-title">
+
+                    Mes communautés
+
+                </h2>
+
+                <div class="community-lists">
+
+                    {% for c in myCommunities|reverse %}
+
+                        <div class="community">
+
+                            <a  target="_blank" href="{{ path('ShowmyCommunaute', {urlPublic: c.urlPublic}) }}" class="community-image d-flex justify-content-center align-items-center">
+
+                                <div class="water loader-md"></div>
+
+                                <img class="d-none" src="{{ asset('profil/'~c.photoProfil) }}" alt="photo de profil">
+
+                            </a>
+
+                            <div class="community-content">
+
+                                <div class="community-content-title-container">
+
+                                    <a target="_blank" href="{{ path('ShowmyCommunaute', {urlPublic: c.urlPublic}) }}" class="community-content-title">{{ c.titre }}</a>&nbsp;&nbsp;({{ c.membres|length + 1 }}&nbsp;membre{{ c.membres|length + 1 < 2 ? '' : 's' }})
+
+                                </div>
+
+                                <div class="community-content-body">
+
+                                    {{ c.descCourt }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% else %}
+
+                        <h1>Vous êtes membre d'aucune tribu</h1>
+
+                    {% endfor %}
+
+                </div>
+
+                <hr class="separator">
+
+                <h2 class="community-list-title font-weight-bold">
+
+                    Les réseaux communautaires
+
+                </h2>
+
+                <div class="community-lists">
+
+                    {% for c in communaute|reverse if c not in myCommunities %}
+
+                        <div class="community">
+
+                            <a target="_blank" href="{{ path('ShowmyCommunaute', {urlPublic: c.urlPublic}) }}" class="community-image d-flex justify-content-center align-items-center">
+
+                                <div class="water loader-md"></div>
+
+                                <img class="d-none" src="{{ asset('profil/'~c.photoProfil) }}" alt="photo de profil">
+
+                            </a>
+
+                            <div class="community-content">
+
+                                <div class="community-content-title-container"><a  target="_blank" href="{{ path('ShowmyCommunaute', {urlPublic: c.urlPublic}) }}" class="community-content-title">{{ c.titre }}</a>&nbsp;&nbsp;({{ c.membres|length + 1 }}&nbsp;membre{{ c.membres|length + 1 < 2 ? '' : 's' }})
+
+                                </div>
+
+                                <div class="community-content-body">
+
+                                    {{ c.descCourt }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% else %}
+
+                        <h3 style="font-size: 2.7rem;">Vide</h3>
+                         
+
+                    {% endfor %}
+
+                </div>
+                {% if app.user is defined and app.user is not null and app.user.username == 'jmc3' or app.user is defined and app.user.username == 'jean' %}
+                         <div style="margin-top:6px;">
+                              <a  class="btn btn-yellow"href="{{ path('listComMembre') }}" style=" font-size: 14px;color: rgba(13, 105, 180, 1)!important;font-weight: bold !important;float:right;">liste des membres par communauté</a>
+                        </div>
+                  {% endif %}
+
+            </div>
+
+    {% endblock %}
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    <script type="text/javascript">
+
+        (function () {
+
+            const container = document.querySelectorAll('.community-image')
+
+            for (let i = 0; i < container.length; i++) {
+
+                const canvas = $('canvas')[0];
+
+                const ctx = canvas.getContext('2d');
+
+                let img;
+
+                const origin = container[i].querySelector('img')
+
+
+
+                load(origin.getAttribute('src'))
+
+
+
+                function load(src) {
+
+                    $(origin).addClass('d-none')
+
+                    $(container).find('div.water').removeClass('d-none')
+
+                    img = new Image();
+
+                    img.onload = function() {
+
+                        run();
+
+                    };
+
+                    img.src = src;
+
+                }
+
+
+
+                function run() {
+
+                    if (!img) return;
+
+                    var options = {
+
+                        width: container[i].offsetWidth,
+
+                        height: container[i].offsetHeight,
+
+                        minScale: 1,
+
+                        ruleOfThirds: true,
+
+                        debug: true
+
+                    };
+
+                    var analyzeOptions = analyze.bind(this, options);
+
+                    analyzeOptions();
+
+                }
+
+                function analyze(options) {
+
+                    smartcrop.crop(img, options, draw);
+
+                }
+
+
+
+                function draw(result) {
+
+                    var selectedCrop = result.topCrop;
+
+                    drawCrop(selectedCrop);
+
+                }
+
+
+
+                function drawCrop(crop) {
+
+                    canvas.width = container[i].offsetWidth;
+
+                    canvas.height = container[i].offsetHeight;
+
+                    ctx.drawImage(
+
+                        img,
+
+                        crop.x,
+
+                        crop.y,
+
+                        crop.width,
+
+                        crop.height,
+
+                        0,
+
+                        0,
+
+                        canvas.width,
+
+                        canvas.height
+
+                    );
+
+                    $(origin).attr('src', canvas.toDataURL(img.type))
+
+                    $(origin).removeClass('d-none')
+
+                    $(container[i]).find('div.water').addClass('d-none')
+
+                }
+
+            }
+
+        })()
+
+    </script>
+
+{% endblock %}
+
+
+

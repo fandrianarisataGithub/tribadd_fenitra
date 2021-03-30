@@ -1,0 +1,428 @@
+{% extends 'layout2.html.twig' %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" />
+{% endblock %}
+{% block title %}{{ video.titre }}{% endblock %}
+{% block metaTitle %}{{ video.titre }}{% endblock %}
+{% block meta %}{{ video.description }}{% endblock %}
+{% block body %}
+    <div class="main">
+        <div class="header-comm-sm">
+            <h3 class="text-comm">rassemblez votre tribu</h3>
+        </div>
+        <div class="sub-body"></div>
+        <div class="community-list-container mx-auto p-3" style="max-width: 1000px;">
+            <div class="row">
+                <div class="col-8">
+                    <video src="{{ asset('videos/'~video.fichier) }}" autoplay controls width="100%"></video><br>
+                    <h2>{{ video.titre }}</h2>
+                </div>
+                <div class="col-4">
+                    <h4>Description</h4>
+                    <p style="text-align: justify">{{ video.description }}</p>
+                </div>
+            </div>
+            <hr class="separator">
+            <div class="card my-4">
+                <h5 class="card-header">Laisser un commentaire:</h5>
+                <div class="card-body">
+                    {% if app.user %}
+                        {% if app.user == communaute.user or membre is not null and membre.role is not null and membre.role.droitsUtilisateur.commentaire == 1 %}
+                            <form method="post" onsubmit="submitComment(event)" action="{{ path('ShowmyCommunaute', {urlPublic:communaute.urlPublic}) }}">
+                                <input name="idVideo" type="hidden" value="{{ video.id }}">
+                                <div class="form-group">
+                                    <textarea name="commentaire" class="form-control" rows="3"></textarea>
+                                </div>
+                                <input type="submit" class="btn btn-yellow" value="commenter">
+                            </form>
+                        {% else %}
+                            <div>
+                                <div class="alert mt-3 alert-danger alert-dismissible fade show">
+                                    Seul un membre peut laisser un commentaire.
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="form-group">
+                                    <textarea disabled name="commentaire" class="form-control" rows="3"></textarea>
+                                </div>
+                                <input disabled type="submit" class="btn btn-yellow" value="commenter">
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div>
+                            <div class="alert mt-3 alert-danger alert-dismissible fade show">
+                                Vous devez vous connecter pour laisser un commentaire.
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <textarea disabled name="commentaire" class="form-control" rows="3"></textarea>
+                            </div>
+                            <input disabled type="submit" class="btn btn-yellow" value="commenter">
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <hr class="separator">
+            <div class="comment-container">
+                <div class="comments-list">
+                    {% for c in video.commentaires|reverse %}
+                        <div class="media mb-4" data-id="{{ c.id }}">
+                            <div class="profile-publisher-container">
+                                <img class="mr-3 rounded-circle profile-publisher" src="{{ c.user.photo is not null ? asset('photo_de_profil/' ~ c.user.photo) : asset('assets/image/user.png') }}" alt="image">
+                            </div>
+                            <div class="media-body">
+                                {% if app.user and app.user == c.user or app.user and  app.user == communaute.user or app.user and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.suppression == 1 %}
+                                    <div class="dropdown">
+                                        <span class="float-right btn btn-icon fa fa-ellipsis-h" data-toggle="dropdown"></span>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            {% if app.user == c.user %}
+                                                <a href="#" onclick="update(event, {{ c.id }})" class="dropdown-item"><i class="fa fa-pen"></i> Modifier</a>
+                                            {% endif %}
+                                            <a href="#" onclick="remove(event, {{ c.id }}, '{{ csrf_token('delete') }}')" class="dropdown-item"><i class="fa fa-trash-alt"></i> Supprimer</a>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <h6 class="mt-0 d-inline-block">{{ c.user.username }}</h6>
+                                <time>{{ c.commentedAt|date('H:i d/m/Y') }}</time>
+                                <div class="comment-content">{{ c.contenus }}</div>
+                                {#<div class="media mt-4">
+                                                <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
+                                                <div class="media-body">
+                                                    <h5 class="mt-0">Commenter Name</h5>
+                                                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+                                                </div>
+                                            </div>#}
+                            </div>
+                        </div>
+                    {% else %}
+                        <span class="nothing">Aucun commentaire</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/fr.min.js" integrity="sha512-RAt2+PIRwJiyjWpzvvhKAG2LEdPpQhTgWfbEkFDCo8wC4rFYh5GQzJBVIFDswwaEDEYX16GEE/4fpeDNr7OIZw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        const profilePublishers = document.querySelectorAll('.profile-publisher-container')
+        for (let i = 0; i < profilePublishers.length; i++) {
+            cropImage(profilePublishers[i], profilePublishers[i].querySelector('img'))
+        }
+        jQuery(function($) {
+            var re = /((http|https|ftp):\/\/[a-zа-я0-9\w?=&.\/-;#~%-]+(?![a-zа-я0-9\w\s?&.\/;#~%"=-]*>))/g;
+            function makeHTML(textNode) {
+                var source = textNode.data;
+                return source.replace(re, function() {
+                    var url = arguments[0];
+                    var a = $('<a></a>').attr({'onclick' : 'window.open(\'' + url + '\'); return false;','href': '#', 'target': '_blank'}).text(url);
+                    return url.match(/^https?:\/\/$/) ? url : $('<div></div>').append(a).html();
+                });
+            }
+            function eachText(node, callback) {
+                $.each(node.childNodes, function() {
+                    if (this.nodeType != 8 && this.nodeName != 'A') {
+                        this.nodeType != 1 ? callback(this) : eachText(this, callback);
+                    }
+                });
+            }
+            $.fn.autolink = function() {
+                return this.each(function() {
+                    var queue = [];
+                    eachText(this, function(e) {
+                        var html = makeHTML(e);
+                        if (html != e.data) {
+                            queue.push([e, makeHTML(e)]);
+                        }
+                    });
+                    $.each(queue, function(i, x) {
+                        $(x[0]).replaceWith(x[1]);
+                    });
+                });
+            };
+            $('.comment-content').autolink()
+        });
+        async function submitComment(e) {
+            e.preventDefault()
+            const data = new FormData(e.target)
+            await $(e.target).find('textarea[name="commentaire"]').val('').focus()
+            if (data.get('commentaire') == '' || data.get('idVideo') == null) {
+                return
+            }
+            $.ajax({
+                url: $(e.target).prop('action'),
+                type: "POST",
+                dataType: "json",
+                processData: false,
+                contentType: false,
+                data: data,
+                success: async function (response) {
+                    if (response.resp === 'success') {
+                        let src = "{{ asset('assets/image/user.png') }}"
+                        if (response.data.user.photo != null) {
+                            src = "{{ asset('photo_de_profil/') }}".concat(response.data.user.photo)
+                        }
+                        const id = response.data.id
+                        const comment = $('.comment-container .comments-list')
+                        const dateformat = moment(response.data.commentedAt.date).format('HH:mm DD/MM/Y');
+                        const canvas = $('canvas')[0];
+                        const ctx = canvas.getContext('2d');
+                        let img;
+
+                        load(src)
+
+                        function load(src) {
+                            if (!!src.match(/assets\/image\/user\.png/i)) {
+                                return false
+                            }
+                            img = new Image();
+                            img.onload = function() {
+                                run();
+                            };
+                            img.src = src;
+                        }
+
+                        function run() {
+                            if (!img) return;
+                            const options = {
+                                width: 50,
+                                height: 50,
+                                minScale: 1,
+                                ruleOfThirds: true,
+                                debug: true
+                            };
+                            const analyzeOptions = analyze.bind(this, options);
+                            analyzeOptions();
+                        }
+
+                        function analyze(options) {
+                            smartcrop.crop(img, options, draw);
+                        }
+
+                        function draw(result) {
+                            const selectedCrop = result.topCrop;
+                            drawCrop(selectedCrop);
+                        }
+
+                        function drawCrop(crop) {
+                            canvas.width = 50;
+                            canvas.height = 50;
+                            ctx.drawImage(
+                                img,
+                                crop.x,
+                                crop.y,
+                                crop.width,
+                                crop.height,
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            );
+                            src = canvas.toDataURL(img.type)
+                        }
+                        let dropdown = ''
+                        {% if app.user %}
+                        let link = ''
+                        {% if app.user == communaute.user and membre is null %}
+                        if (response.data.user.username === "{{ app.user.username }}") {
+                            link = `<a href="#" onclick="update(event, ${id})" class="dropdown-item"><i class="fa fa-pen"></i> Modifier</a>`
+                        }
+                        dropdown += `<div class="dropdown">
+                                                <span class="float-right btn btn-icon fa fa-ellipsis-h" data-toggle="dropdown"></span>
+                                                <div class="dropdown-menu">
+                                                    ${link}
+                                                    <a href="#" onclick="remove(event, ${id}, '{{ csrf_token('delete') }}')" class="dropdown-item"><i class="fa fa-trash-alt"></i> Supprimer</a>
+                                                </div>
+                                        </div>`
+                        {% elseif membre is not null %}
+                        {% if membre.role is not null and membre.role.droitsUtilisateur.suppression == 1 %}
+                        if (response.data.user.username === "{{ app.user.username }}") {
+                            link = '<a href="#" onclick="update(event, ${id})" class="dropdown-item"><i class="fa fa-pen"></i> Modifier</a>'
+                        }
+                        dropdown += `<div class="dropdown">
+                                                        <span class="float-right btn btn-icon fa fa-ellipsis-h" data-toggle="dropdown"></span>
+                                                        <div class="dropdown-menu">
+                                                        ${link}
+                                                            <a href="#" onclick="remove(event, ${id}, '{{ csrf_token('delete') }}')" class="dropdown-item"><i class="fa fa-trash-alt"></i> Supprimer</a>
+                                                        </div>
+                                                </div>`
+                        {% else %}
+                        if (response.data.user.username === "{{ app.user.username }}") {
+                            dropdown += `<div class="dropdown">
+                                                <span class="float-right btn btn-icon fa fa-ellipsis-h" data-toggle="dropdown"></span>
+                                                <div class="dropdown-menu">
+                                                <a href="#" onclick="update(event, ${id})" class="dropdown-item"><i class="fa fa-pen"></i> Modifier</a>
+                                                    <a href="#" onclick="remove(event, ${id}, '{{ csrf_token('delete') }}')" class="dropdown-item"><i class="fa fa-trash-alt"></i> Supprimer</a>
+                                                </div>
+                                        </div>`
+                        }
+                        {% endif %}
+                        {% else %}
+                        dropdown = ''
+                        {% endif %}
+                        {% endif %}
+                        setTimeout(function () {
+                            comment.prepend(`
+                            <div class="media mb-3" data-id="${id}">
+                                <div class="profil-comment">
+                                    <img class="mr-3 rounded-circle profile-publisher" src="${src}" alt="image rond">
+                                </div>
+                                <div class="media-body">
+                                    ${dropdown}
+                                    <h6 class="mt-0 d-inline-block">${response.data.user.username}</h6>
+                                    <time>${dateformat}</time>
+                                    <div class="comment-content">${response.data.contenus}</div>
+                                </div>
+                            </div>
+                        `)
+                            comment.find('span.nothing').remove()
+                            $('.comment-content').autolink()
+                        }, 100)
+                    } else {
+                        console.log(response.resp)
+                    }
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            })
+        }
+        const fetchAction = async function (url, data = {}) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    "content-type": "application/json"
+                },
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                return response.json()
+            } else {
+                let error = await response.json()
+                throw new Error(error.message)
+            }
+        }
+        let active = false
+        function update(e, id) {
+            e.preventDefault()
+            if (active)
+            {
+                return false
+            }
+            active = true
+            const comment = $('.media[data-id="'.concat(id, '"]')),
+                message = comment.find('.comment-content').text()
+            comment.find('.comment-content').replaceWith(`
+                <div class="comment-content row">
+                    <div class="col-md-8 col-sm-12 position-relative">
+                        <textarea rows="1" class="form-control">${message}</textarea>
+                        <span class="text-danger d-none">La valeur ne peut être vide</span>
+                    </div>
+                    <div class="col-md-4 col-sm-12">
+                        <button class="btn btn-primary" title="Modifier"><i class="fa fa-pen"></i></button>
+                        <button class="btn btn-outline-secondary" title="Réinitialiser"><i class="fa fa-redo"></i></button>
+                        <button class="btn btn-danger" title="Annuler"><i class="fa fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            `)
+            comment.find('.comment-content textarea').focus()
+            comment.find('button[title="Annuler"]').on('click', function (e) {
+                e.preventDefault()
+                $(this).closest('.comment-content').replaceWith(`<div class="comment-content">${message}</div>`)
+                active = false
+                $('.comment-content').autolink()
+            })
+            comment.find('button[title="Modifier"]').on('click', async function (e) {
+                e.preventDefault()
+                const $this = this
+                $($this).find('i').removeClass('fa fa-pen').addClass('loader').prop('disabled', true)
+                const value = comment.find('.comment-content').find('textarea').val()
+                const response = await fetchAction("/in/edit/comment-".concat(id, '.html'), {value: value})
+                if (response.result === 'success') {
+                    $($this).find('i').addClass('fa fa-pen').removeClass('loader').prop('disabled', false)
+                    comment.find('.comment-content').replaceWith(`<div class="comment-content">${value}</div>`)
+                    active = false
+                    $('.comment-content').autolink()
+                    return false
+                }
+                const textarea = comment.find('.comment-content').find('textarea')
+                comment.find('.comment-content span.text-danger').removeClass('d-none')
+                $($this).find('i').addClass('fa fa-pen').removeClass('loader').prop('disabled', false)
+                textarea.on('input', function () {
+                    if ('' !== this.value) {
+                        comment.find('.comment-content span.text-danger').addClass('d-none')
+                    } else {
+                        comment.find('.comment-content span.text-danger').removeClass('d-none')
+                    }
+                })
+            })
+            comment.find('button[title="Réinitialiser"]').on('click', function (e) {
+                e.preventDefault()
+                $(this).closest('.comment-content').find('textarea').val(message).focus()
+            })
+
+        }
+
+        async function remove(e, id, token) {
+            e.preventDefault()
+            if (confirm('Voulez-vous vraiment supprimer ce commentaire ?')) {
+                const response = await fetchAction("/in/remove/comment-".concat(id, ".html"), {_token: token})
+                if (response.result === 'success') {
+                    const comment = $('.media[data-id="'.concat(id, '"]'))
+                    await comment.fadeOut("slow", function () {
+                        this.remove()
+                        if (document.querySelectorAll('.media').length < 1) {
+                            $('.comment-container .comments-list').html('<span class="nothing">Aucun commentaire</span>')
+                        }
+                    })
+                    const opts = {
+                        "closeButton": true,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": true,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": true,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "10000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.success("Le commentaire a été supprimer", '', opts);
+                } else {
+                    const opts = {
+                        "closeButton": true,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": true,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": true,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "10000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.error("Echec de la suppression du commentaire", '', opts);
+                }
+            } else {
+                return false
+            }
+        }
+    </script>
+{% endblock %}
