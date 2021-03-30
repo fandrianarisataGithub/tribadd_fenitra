@@ -141,4 +141,74 @@ div.post-contenu p{
       width: 320px !important;
    }
 }
+/* style mail calendar */
+
+.container-email{
+   background: #e0e0df;
+   width: 80%;
+   margin: auto;
+}
+.container-email header{
+   height: 50px;
+   padding-top: 15px;
+   padding-bottom: 15px;
+   padding-left: 15px;
+   background-color: rgba(13, 105, 180, 1); color: white; font-weight: bold;
+}
+.entete-mail{
+   text-align: center;
+   width: 98%;
+   margin: auto;
+   border-bottom: 1px solid rgba(255,255,255,0.3)
+}
+.content-mail{
+   width: 75%;
+  
+   margin: auto;
+}
+.event-title{
+ 
+   height: 35px;
+   padding-top: 10px;
+   padding-left: 15px;
+}
+.event-image{
+   text-align: center;
+}
+.event-image img{
+   width: 75%;
+   height: auto;
+   margin : auto;
+}
+.event-description{
+   width: 75%;
+   height: auto;
+   margin : auto;
+   text-align: justify;
+}
+.link{
+    width: 75%;
+   margin : auto;
+   padding-bottom: 25px;
+   text-align: end;
+}
+.link a{
+   text-decoration: none;
+   display: inline-block;
+   color: #212529;
+   background-color: #ffc107;
+   border-color: #ffc107;
+   width : 150px;
+   text-align : center;
+   height : 30px;
+   padding-top : 13px;
+   border-radius: 5px;
+   color: #000;
+   font-size: 14px;
+}
+.link a:hover{
+   background: #eeb509;
+}
+
+/* fin style mail */
 

@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use DateTime;
 use App\Kernel;
+use Swift_Image;
+use Swift_Message;
 use App\Entity\Event;
 use App\Entity\Message;
 use App\Entity\Communaute;
@@ -434,7 +436,7 @@ class CalendarController extends AbstractController
      * @Route("/send-invitation/event/{event_id}/", name="send_invitation_event")
      * @return Response
      */
-    public function sendNewsLetter($event_id, \Swift_Mailer $mailer, Request $request, EventRepository $repoEvent, RouterInterface $router){
+    public function send_invitation_event($event_id, \Swift_Mailer $mailer, Request $request, EventRepository $repoEvent, RouterInterface $router){
         $event = $repoEvent->find($event_id);
         $users = [];
         $communaute = $event->getCommunaute();
@@ -443,17 +445,33 @@ class CalendarController extends AbstractController
             $users [] = $member->getUser();
         }
         $url = 'https://'.$router->getContext()->getHost();
-        foreach ($users as $user){
-            $message = (new \Swift_Message($event->getTitle()))
-                ->setFrom($communaute->getUser()->getEmail())
-                ->setTo(trim($user->getEmail()))
-                ->setBody($this->renderView('emails/invitation_event.html.twig',[
-                    'event'         => $event,
-                    'communaute'    => $communaute
-                ]));
-            $mailer->send($message);
-        }
-        return $this->redirectToRoute('voir_detail_event',['id'=>$event->getId()]);
+        // foreach ($users as $user){
+        //     $message = (new \Swift_Message($event->getTitle()))
+        //         ->setFrom($communaute->getUser()->getEmail())
+        //         ->setTo(trim($user->getEmail()))
+        //         ->setBody($this->renderView('emails/invitation_event.html.twig',[
+        //             'event'         => $event,
+        //             'communaute'    => $communaute
+        //         ]));
+        //     $mailer->send($message);
+        // }
+        $message = (new \Swift_Message($event->getTitle()))
+        ->setFrom("enac.fenitriniaina@gmail.com")
+        ->setTo("enac.fenitriniaina@gmail.com");
+        $image = $event->getImage();
+        $img = $message->embed(\Swift_Image::fromPath('events/' . $event->getImage()));
+        $message->setBody($this->renderView('emails/invitation_event.html.twig',[
+            'event'         => $event,
+            'communaute'    => $communaute,
+            'img'           => $img,
+        ]), 'text/html');
+        $mailer->send($message);
+        //return $this->redirectToRoute('voir_detail_event',['id'=>$event->getId()]);
+        return $this->render('emails/invitation_event.html.twig', [
+            'event'         => $event,
+            'communaute'    => $communaute,
+            'img'           => $event->getImage(),
+        ]);
     }
     /**
      * @Route("/calendars/event/load_nbr_participant", name = "load_nbr_participant")
@@ -501,8 +519,27 @@ class CalendarController extends AbstractController
                 $data = json_encode($val);
                 $response->headers->set('Content-Type', 'application/json');
                 $response->setContent($data);
-        
-        
         return $response;
+    }
+    /**
+     * @Route("/test", name = "test")
+     */
+    public function mandefa(\Swift_Mailer $mailer)
+    {
+       
+        $message = (new \Swift_Message('Hello Email'))
+        ->setFrom('fandrianarisata2@gmail.com')
+        ->setTo('enac.fenitriniaina@gmail.com')
+        ->setBody(
+            $this->renderView(
+                // templates/emails/registration.html.twig
+                'emails/test.html.twig',
+               
+            ),
+            'text/html'
+        );
+        $mailer->send($message);
+        $this->addFlash('message', "le mail a bien été envoyé");
+        $this->redirectToRoute("showCalendar", ['id' => 1]);
     }
 }

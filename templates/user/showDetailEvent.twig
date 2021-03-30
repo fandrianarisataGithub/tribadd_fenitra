@@ -46,7 +46,7 @@
             font-size: 12px;
         }
     </style>
-     <link rel="stylesheet" href="{{ asset('calendar_css/calendar.css') }}">
+    <link rel="stylesheet" href="{{ asset('calendar_css/calendar.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -99,7 +99,7 @@
                     {% endif %}
                 {% endif %}
                 {% if app.user and communaute.user == app.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.suppression == 1 %}
-                    <a class="btn btn-danger" href="#" id="delete_event"><i class="fa fa-trash-alt"></i> supprimer</a>
+                    <a class="btn btn-danger" href="#" id="delete_event" data-toggle="modal" data-target="#delete_event_modal"><i class="fa fa-trash-alt"></i> supprimer</a>
                 {% endif %}
                 {% if app.user and communaute.user == app.user or app.user and membre is defined and membre is not null and membre.role is not null and membre.role.droitsUtilisateur.modification == 1 %}
                     {% if event.user == app.user or app.user == communaute.user or membre.role.libelle == 'administrateur' %}
@@ -187,7 +187,7 @@
                 </div>
                 <div class="modal-footer">
                     <div class="button_action">
-                        <a href="#" class="btn btn-info" id="btn_delete_event">Supprimer</a>
+                        <a href="#" class="btn btn-danger" id="btn_delete_event">Supprimer</a>
                     </div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
                 </div>
@@ -207,9 +207,12 @@
             
             function delete_event(){
                 var id = '{{ event.id }}'
-                window.location.href = 
+                window.location.href = "/calendars/remove_event/" + id;
             }
-
+            $('#btn_delete_event').click(function(ev){
+                ev.preventDefault();
+                delete_event();
+            })
             function test_mail_for_part(mail){
                 if(mail != ""){
                     $.ajax({
@@ -276,7 +279,7 @@
                         type    : "POST",
                         data    :data, 
                         success : function(response){
-                            alert(response);
+                            
                             if(response == "error mail"){
                                 $('.info p').text('Veuillez renseigner un email valide');
                                 $('.info').fadeIn();
