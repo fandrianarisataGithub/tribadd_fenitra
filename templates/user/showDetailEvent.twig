@@ -194,6 +194,23 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="mail_success" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title_event_modal">L'invitation a bien été envoyé pour tous les membres</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block javascripts %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
@@ -201,6 +218,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function(){
+
+            /* envoie de mail ajax*/
+            $('#invitation_event').on('click', function(ev){
+                ev.preventDefault();
+                var event_id = '{{ event.id }}';
+                $.ajax({
+                    url : "{{ path('send_invitation_event',{'event_id' : event.id }) }}",
+                    type : "POST",
+                    data : {'event_id' : event_id},
+                    beforeSend : function(){
+                        $('#invitation_event').text('Patienter ...');
+                    }, 
+                    success :  function(response){
+                       if(response == "ok"){
+                            $('#mail_success').modal('show');
+                       }
+                    }, 
+                    complete : function(){
+                        setTimeout(() => {
+                             $('#mail_success').modal('hide');
+                        }, 2000);
+                         $('#invitation_event').text('Inviter tous les membres');
+                    }, 
+                    error : function(){
+                        console.log('error envoie mail pour tous les membres');
+                    }
+                })
+            })
+
+
             load_nombre_participant()
             
             test_mail_for_part($('#participer').attr('data-user'));

@@ -10,6 +10,7 @@ use App\Entity\Event;
 use App\Entity\Message;
 use App\Entity\Communaute;
 use App\Entity\PersonParticipant;
+use App\Repository\UserRepository;
 use App\Repository\EventRepository;
 use App\Repository\MembresRepository;
 use App\Repository\CommunauteRepository;
@@ -31,6 +32,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Config\FileLocator as ConfigFileLocator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 class CalendarController extends AbstractController
 {
@@ -50,15 +52,19 @@ class CalendarController extends AbstractController
      * @param Communaute $repoCom
      * @return Response
      */
-    public function showCalendar($id,CommunauteRepository $repoCom, Request $request, MembresRepository $repositoryMembre)
+    public function showCalendar($id,CommunauteRepository $repoCom, Request $request, MembresRepository $repositoryMembre,
+    
+    UserRepository $userRepository)
     {   
+
+        
         
         $currentWeekNumber = date('W');
         //dd('Week number:' . $currentWeekNumber);
 
         $communaute = $repoCom->find($id);
+
         $user = $this->getUser();
-        
         $events = $this->em->getRepository(Event::class)->findBy(['communaute' => $communaute]);
         $membre = $repositoryMembre->findOneBy(['user' => $user, 'communaute' => $communaute]);
 
@@ -87,6 +93,35 @@ class CalendarController extends AbstractController
             $mode_affichage = 'listWeek';
         }
         $data = json_encode($listes);
+
+        if(isset($_POST['login']) and $_POST['login'] == "Envoyer")
+        {
+            $username = $_POST['_username'];
+            $password = $_POST['_password'];
+            $path = $_POST['path'];
+            $user = $userRepository->findUser($username, sha1($password));
+            if($user != null) {
+                $token = new UsernamePasswordToken($user, null, 'frontoffice', $user->getRoles());
+                $this->get('security.token_storage')->getToken()->setAuthenticated(false);
+                $this->get('security.token_storage')->setToken($token);
+                $this->get('security.token_storage')->getToken()->setUser($user);
+                return $this->redirect($path);
+            }else{
+                return $this->render('calendar/show_calendar.html.twig', [
+                   
+                    'error'                 =>"L'authentification n'est pas validé",
+                    'lastUsername'          =>$username,
+                    'communaute'            => $communaute,
+                    'clicked'               => true,
+                    'data'                  => $data,
+                    'membre'                => $membre,
+                    'user'                  => $user,
+                    'calendar'              => true,
+                    'mode_affichage'        => $mode_affichage,
+                ]);
+            }
+        }
+
         return $this->render('calendar/show_calendar.html.twig', [
             'communaute'            => $communaute,
             'clicked'               => true,
@@ -98,6 +133,7 @@ class CalendarController extends AbstractController
         ]);
             
     }
+
 
     /**
      * @Route("/calendars/nouvel-event/{communaute_id}", name="newEvent")
@@ -343,14 +379,37 @@ class CalendarController extends AbstractController
     /**
      * @Route("/calendars/voir_detail_event/{id}", name="voir_detail_event")
      */
-    public function voir_detail_event(Event $event, Request $request, MembresRepository $membresRepository) :Response
+    public function voir_detail_event(Event $event, Request $request, MembresRepository $membresRepository, UserRepository $userRepository) :Response
     {
         $communaute = $event->getCommunaute();
         $user = $this->getUser();
-        // if($user == null){
-        //     return $this->redirect('/');
-        // }
+        
         $membre = $membresRepository->findOneBy(['user' => $user, 'communaute' => $event->getCommunaute()]);
+
+        if(isset($_POST['login']) and $_POST['login'] == "Envoyer")
+        {
+            $username = $_POST['_username'];
+            $password = $_POST['_password'];
+            $path = $_POST['path'];
+            $user = $userRepository->findUser($username, sha1($password));
+            if($user != null) {
+                $token = new UsernamePasswordToken($user, null, 'frontoffice', $user->getRoles());
+                $this->get('security.token_storage')->getToken()->setAuthenticated(false);
+                $this->get('security.token_storage')->setToken($token);
+                $this->get('security.token_storage')->getToken()->setUser($user);
+                return $this->redirect($path);
+            }else{
+                return $this->render('calendar/show_calendar.html.twig', [
+                   
+                    'error'                 =>"L'authentification n'est pas validé",
+                    'lastUsername'          =>$username,
+                    'event'                 => $event,
+                    'communaute'            => $event->getCommunaute(),
+                    'membre'                => $membre
+                ]);
+            }
+        }
+
         return $this->render("user/showDetailEvent.twig", [
             'event' => $event,
             'communaute' => $event->getCommunaute(),
@@ -433,45 +492,44 @@ class CalendarController extends AbstractController
      * @param \Swift_Mailer $mailer
      * @param Request $request
      * @param EventRepository $repoEvent
-     * @Route("/send-invitation/event/{event_id}/", name="send_invitation_event")
+     * @Route("/send-invitation/event/", name="send_invitation_event")
      * @return Response
      */
-    public function send_invitation_event($event_id, \Swift_Mailer $mailer, Request $request, EventRepository $repoEvent, RouterInterface $router){
-        $event = $repoEvent->find($event_id);
-        $users = [];
-        $communaute = $event->getCommunaute();
-        
-        foreach ($communaute->getMembres() as $member){
-            $users [] = $member->getUser();
+    public function send_invitation_event(\Swift_Mailer $mailer, Request $request, EventRepository $repoEvent, RouterInterface $router){
+        $response = new Response();
+        if($request->isXmlHttpRequest()){
+            
+            $event_id = $request->get('event_id');
+            $event = $repoEvent->find($event_id);
+            $users = [];
+            $communaute = $event->getCommunaute();
+            
+            foreach ($communaute->getMembres() as $member){
+                $users [] = $member->getUser();
+            }
+            $url = 'https://'.$router->getContext()->getHost();
+            
+            foreach ($users as $user){
+                
+                $message = (new \Swift_Message($event->getTitle()))
+                ->setFrom($communaute->getUser()->getEmail())
+                ->setTo(trim($user->getEmail()));
+                $img = $message->embed(\Swift_Image::fromPath('events/' . $event->getImage()));
+                $message->setBody($this->renderView('emails/invitation_event.html.twig',[
+                    'event'         => $event,
+                    'communaute'    => $communaute,
+                    'img'           => $img,
+                ]), 'text/html');
+                $mailer->send($message);
+                
+            }
+            $data = json_encode("ok");
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent($data);
+            return $response;
+            //$this->addFlash('message', "L'email est envoyé pour tous les membres");
+            //return $this->redirectToRoute('voir_detail_event',['id'=>$event->getId()]);
         }
-        $url = 'https://'.$router->getContext()->getHost();
-        // foreach ($users as $user){
-        //     $message = (new \Swift_Message($event->getTitle()))
-        //         ->setFrom($communaute->getUser()->getEmail())
-        //         ->setTo(trim($user->getEmail()))
-        //         ->setBody($this->renderView('emails/invitation_event.html.twig',[
-        //             'event'         => $event,
-        //             'communaute'    => $communaute
-        //         ]));
-        //     $mailer->send($message);
-        // }
-        $message = (new \Swift_Message($event->getTitle()))
-        ->setFrom("enac.fenitriniaina@gmail.com")
-        ->setTo("enac.fenitriniaina@gmail.com");
-        $image = $event->getImage();
-        $img = $message->embed(\Swift_Image::fromPath('events/' . $event->getImage()));
-        $message->setBody($this->renderView('emails/invitation_event.html.twig',[
-            'event'         => $event,
-            'communaute'    => $communaute,
-            'img'           => $img,
-        ]), 'text/html');
-        $mailer->send($message);
-        //return $this->redirectToRoute('voir_detail_event',['id'=>$event->getId()]);
-        return $this->render('emails/invitation_event.html.twig', [
-            'event'         => $event,
-            'communaute'    => $communaute,
-            'img'           => $event->getImage(),
-        ]);
     }
     /**
      * @Route("/calendars/event/load_nbr_participant", name = "load_nbr_participant")

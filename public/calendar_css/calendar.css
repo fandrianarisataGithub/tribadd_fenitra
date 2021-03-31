@@ -209,6 +209,9 @@ div.post-contenu p{
 .link a:hover{
    background: #eeb509;
 }
+.fc-daygrid-event:hover, .fc-list-event-title a:hover{
+   cursor: pointer;
+}
 
 /* fin style mail */
 
