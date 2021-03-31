@@ -399,7 +399,7 @@ class CalendarController extends AbstractController
                 $this->get('security.token_storage')->getToken()->setUser($user);
                 return $this->redirect($path);
             }else{
-                return $this->render('calendar/show_calendar.html.twig', [
+                return $this->render('calendar/showDetailEvent.html.twig', [
                    
                     'error'                 =>"L'authentification n'est pas validé",
                     'lastUsername'          =>$username,
@@ -410,7 +410,7 @@ class CalendarController extends AbstractController
             }
         }
 
-        return $this->render("user/showDetailEvent.twig", [
+        return $this->render("user/showDetailEvent.html.twig", [
             'event' => $event,
             'communaute' => $event->getCommunaute(),
             'membre' => $membre
