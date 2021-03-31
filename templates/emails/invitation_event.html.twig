@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="container-email" 
 	style="background: #e0e0df;
 	width: 80%;
@@ -9,6 +10,110 @@
 		padding-left: 15px;
 		background-color: rgba(13, 105, 180, 1); color: white; font-weight: bold;"
 	>
+=======
+
+{#<div class="container">
+	<header style="background-color: rgba(13, 105, 180, 1); color: white; font-weight: bold; padding: 4px; border-radius: 10px">
+		<h2>Tribadd</h2>
+	</header><br>
+	<div class="content">
+		<p style="width: 100%">{{ communaute.titre|raw }}<hr></p>
+		{% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+			<table style=" background-color: rgba(121,121,121,0.4); padding: 10px; border-radius: 5px; width: 100%">
+				<tr>
+					<td colspan="2" style="height: 30px">
+						<h4>{{ event.title|raw }}</h4>
+					</td>
+				</tr>
+				<tr>
+					<td style="max-width: 100px;">
+						{# <img width="100px" class="d-none" src="{{ img }}" alt="photo event"> #}
+						{#<img width="100px" class="d-none" src="{{ asset('events/' ~ event.image) }}" alt="photo event">
+					</td>
+					<td style="vertical-align:top;">{{ event.description|raw }}</td>
+				</tr>
+				<tr>
+					<td colspan="2">						
+						<a href="{{ url('voir_detail_event', {'id' : event.id}) }}" class="read-more">Participer</a>
+					</td>
+				</tr>
+			</table><hr>
+	
+	</div>
+</div> #}
+<style>
+
+	.container-email{
+   background: #e0e0df;
+   width: 80%;
+   margin: auto;
+}
+.container-email header{
+   height: 50px;
+   padding-top: 15px;
+   padding-bottom: 15px;
+   padding-left: 15px;
+   background-color: rgba(13, 105, 180, 1); color: white; font-weight: bold;
+}
+.entete-mail{
+   text-align: center;
+   width: 98%;
+   margin: auto;
+   border-bottom: 1px solid rgba(255,255,255,0.3)
+}
+.content-mail{
+   width: 75%;
+  
+   margin: auto;
+}
+.event-title{
+ 
+   height: 35px;
+   padding-top: 10px;
+   padding-left: 15px;
+}
+.event-image{
+   text-align: center;
+}
+.event-image img{
+   width: 75%;
+   height: auto;
+   margin : auto;
+}
+.event-description{
+   width: 75%;
+   height: auto;
+   margin : auto;
+   text-align: justify;
+}
+.link{
+    width: 75%;
+   margin : auto;
+   padding-bottom: 25px;
+   text-align: end;
+}
+.link a{
+   text-decoration: none;
+   display: inline-block;
+   color: #212529;
+   background-color: #ffc107;
+   border-color: #ffc107;
+   width : 150px;
+   text-align : center;
+   height : 30px;
+   padding-top : 13px;
+   border-radius: 5px;
+   color: #000;
+   font-size: 14px;
+}
+.link a:hover{
+   background: #eeb509;
+}
+
+</style>
+<div class="container-email">
+	<header>
+>>>>>>> 9e0197f9236023d83976ab0e5bbdc2208357564d
 		<h2>Tribadd</h2>
 	</header>
 	<div class="entete-mail"
